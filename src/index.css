@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-white text-ink-900 font-sans font-normal antialiased transition-colors duration-300;
+    /* Open, comfortable line-height for long-form reading. */
+    line-height: 1.65;
+  }
+
+  .dark body {
+    @apply bg-ink-950 text-ink-100;
+  }
+
+  /*
+   * Strong, uniform heading hierarchy: every heading is bold with slightly
+   * tighter tracking, matching a modern IT/SaaS product typographic scale.
+   * `font-weight` is forced with `!important` so this holds even where an
+   * older `font-semibold` / `font-black` utility is still present on a
+   * heading tag — the rest (tracking/line-height) stays a plain default so
+   * per-component `leading-*` / `tracking-*` utilities can still override it.
+   */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-sans;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  /*
+   * UI chrome — buttons, links styled as buttons, and form labels — default
+   * to Medium (500), one step above body copy and one step below headings.
+   * Left as a plain default (no `!important`) so a component can still opt
+   * into a different weight explicitly where needed.
+   */
+  button,
+  [type='button'],
+  [type='submit'],
+  label {
+    font-weight: 500;
+  }
+
+  /* Visible focus ring for keyboard users across the whole app. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white dark:ring-offset-ink-950;
+  }
+}
+
+@layer components {
+  /* Uppercase kicker used above section titles. */
+  .kicker {
+    @apply font-sans text-xs font-medium uppercase tracking-[0.18em] text-brand-600 dark:text-brand-300;
+  }
+
+  /* Small pill used for categories and tags. */
+  .chip {
+    @apply inline-flex items-center rounded-sm px-2 py-0.5 font-sans text-[11px] font-medium uppercase tracking-wider;
+  }
+
+  /* Surface used by every card so light/dark stay consistent. */
+  .surface {
+    @apply border border-ink-200 bg-white dark:border-ink-800 dark:bg-ink-900;
+  }
+
+  .card-hover {
+    @apply transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-ink-900/10 dark:hover:shadow-black/40;
+  }
+
+  /* Prose defaults for the single-article body. */
+  .article-body p {
+    @apply mb-5 text-[1.0625rem] font-normal leading-8 text-ink-700 dark:text-ink-200;
+  }
+
+  .article-body p:first-of-type {
+    @apply text-lg font-medium leading-8 text-ink-900 dark:text-ink-50;
+  }
+}
+
+/* Pause the breaking-news ticker on hover / for reduced-motion users. */
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Thin scrollbars for the latest-posts rail. */
+.rail-scroll {
+  scrollbar-width: thin;
+}
+
+.rail-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.rail-scroll::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-ink-300 dark:bg-ink-700;
+}
