@@ -8,16 +8,20 @@ import TeamPanel from '../components/TeamPanel';
 import CeoProfileCard from '../components/CeoProfileCard';
 import CeoPanel from '../components/CeoPanel';
 import { PlusIcon } from '../components/Icons';
+import { useAdminAuth } from '../context/AdminAuthContext';
 
 const TABS = [
   { id: 'events', label: 'Events' },
-  { id: 'signups', label: 'Event signups' },
+  { id: 'signups', label: 'Event signups', adminOnly: true },
   { id: 'news', label: 'News' },
-  { id: 'team', label: 'Team' },
-  { id: 'ceo', label: 'CEO & Founder' },
+  { id: 'team', label: 'Team', adminOnly: true },
+  { id: 'ceo', label: 'CEO & Founder', adminOnly: true },
 ];
 
 export default function ContentPage() {
+  const { user } = useAdminAuth();
+  const isAdmin = user?.role === 'admin';
+  const visibleTabs = TABS.filter((tab) => isAdmin || !tab.adminOnly);
   const [activeTab, setActiveTab] = useState('events');
 
   const [events, setEvents] = useState([]);
@@ -67,7 +71,7 @@ export default function ContentPage() {
     let cancelled = false;
     setLoading(true);
     setError('');
-    Promise.all([loadEvents(), loadNews(), loadSignups(), loadTeam(), loadCeo()])
+    Promise.all([loadEvents(), loadNews(), isAdmin ? loadSignups() : null, loadTeam(), loadCeo()])
       .catch((err) => {
         if (!cancelled) setError(err.message || 'Failed to load dashboard data.');
       })
@@ -77,7 +81,7 @@ export default function ContentPage() {
     return () => {
       cancelled = true;
     };
-  }, [loadEvents, loadNews, loadSignups, loadTeam, loadCeo]);
+  }, [loadEvents, loadNews, loadSignups, loadTeam, loadCeo, isAdmin]);
 
   function switchTab(tabId) {
     setActiveTab(tabId);
@@ -225,7 +229,7 @@ export default function ContentPage() {
   return (
     <div className="p-6">
       <div className="mb-6 flex items-center gap-1 rounded-t-lg border-b border-brand-100 bg-white/60 px-1 pt-1">
-        {TABS.map((tab) => (
+        {visibleTabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
@@ -265,7 +269,7 @@ export default function ContentPage() {
                 <p className="text-sm text-ink-500">Loading events…</p>
               ) : events.length === 0 ? (
                 <div className="rounded-lg border-2 border-dashed border-brand-200 bg-brand-50/30 p-10 text-center text-sm text-ink-500">
-                  No events yet — create your first one using the panel on the right.
+                  No events yet. Create your first one using the panel on the right.
                 </div>
               ) : (
                 events.map((event) => (
@@ -299,7 +303,7 @@ export default function ContentPage() {
                 <p className="text-sm text-ink-500">Loading news…</p>
               ) : news.length === 0 ? (
                 <div className="rounded-lg border-2 border-dashed border-brand-200 bg-brand-50/30 p-10 text-center text-sm text-ink-500">
-                  No news posts yet — create your first one using the panel on the right.
+                  No news posts yet. Create your first one using the panel on the right.
                 </div>
               ) : (
                 news.map((item) => (
@@ -338,7 +342,7 @@ export default function ContentPage() {
                 <p className="text-sm text-ink-500">Loading team…</p>
               ) : team.length === 0 ? (
                 <div className="rounded-lg border-2 border-dashed border-brand-200 bg-brand-50/30 p-10 text-center text-sm text-ink-500">
-                  No workers yet — add your first one using the panel on the right.
+                  No workers yet. Add your first one using the panel on the right.
                 </div>
               ) : (
                 team.map((member) => (

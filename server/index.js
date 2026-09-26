@@ -1,8 +1,8 @@
+import 'dotenv/config';
 import express from 'express';
 import helmet from 'helmet';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import dotenv from 'dotenv';
 
 import authRoutes from './routes/auth.js';
 import eventsRoutes from './routes/events.js';
@@ -10,10 +10,15 @@ import newsRoutes from './routes/news.js';
 import signupsRoutes from './routes/signups.js';
 import teamRoutes from './routes/team.js';
 import ceoRoutes from './routes/ceo.js';
+import editorsRoutes from './routes/editors.js';
+import contactRoutes from './routes/contact.js';
+import subscribersRoutes from './routes/subscribers.js';
+import newslettersRoutes from './routes/newsletters.js';
+import commentsRoutes from './routes/comments.js';
+import submissionsRoutes from './routes/submissions.js';
+import settingsRoutes from './routes/settings.js';
 import { uploadsDir } from './upload.js';
 import './db.js'; // ensures the database & tables are initialised
-
-dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -21,6 +26,9 @@ const PORT = process.env.PORT || 4000;
 const isProduction = process.env.NODE_ENV === 'production';
 
 app.disable('x-powered-by');
+// Behind a hosting proxy (Render, Railway, Nginx...) set TRUST_PROXY=1 so the
+// spam limiter sees each visitor's real IP address.
+if (process.env.TRUST_PROXY) app.set('trust proxy', Number(process.env.TRUST_PROXY) || 1);
 app.use(
   helmet({
     // Images/uploads are served from this same origin in production; relax
@@ -40,6 +48,13 @@ app.use('/api/news', newsRoutes);
 app.use('/api/signups', signupsRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/ceo', ceoRoutes);
+app.use('/api/editors', editorsRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/subscribers', subscribersRoutes);
+app.use('/api/newsletters', newslettersRoutes);
+app.use('/api/comments', commentsRoutes);
+app.use('/api/submissions', submissionsRoutes);
+app.use('/api/settings', settingsRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

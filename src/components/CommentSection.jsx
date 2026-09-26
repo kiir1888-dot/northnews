@@ -1,35 +1,34 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { formatDate } from '../utils/format';
-
-/** Seed comments so the thread is never empty on first view. */
-const seedComments = [
-  {
-    id: 'c-1',
-    name: 'Ifeoma Chukwu',
-    createdAt: '2026-09-21T08:12:00Z',
-    body: 'Useful breakdown. The point about regional variation is the one most coverage skips — would be good to see the state-level table published alongside this.',
-  },
-  {
-    id: 'c-2',
-    name: 'Samuel Trent',
-    createdAt: '2026-09-21T09:47:00Z',
-    body: 'Strong reporting. Any indication of when the consultation documents will be made public?',
-  },
-];
+import { getJson, postJson } from '../lib/publicApi';
+import Honeypot from './Honeypot';
 
 /**
- * CommentSection — interactive comment field with client-side validation.
- * Comments are held in local state (mock backend); wire the submit handler to
- * a real API when one is available.
+ * CommentSection — shows approved comments for an article and lets readers
+ * post new ones, which appear once the newsroom approves them.
  */
 export default function CommentSection({ articleId }) {
-  const [comments, setComments] = useState(seedComments);
+  const [comments, setComments] = useState([]);
   const [form, setForm] = useState({ name: '', email: '', body: '' });
+  const [trap, setTrap] = useState('');
   const [errors, setErrors] = useState({});
+  const [sending, setSending] = useState(false);
+  const [posted, setPosted] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getJson(`/comments?articleId=${encodeURIComponent(articleId)}`)
+      .then((data) => !cancelled && setComments(data.comments))
+      .catch(() => !cancelled && setComments([]));
+    return () => {
+      cancelled = true;
+    };
+  }, [articleId]);
 
   const update = (field) => (e) => {
     setForm((f) => ({ ...f, [field]: e.target.value }));
-    setErrors((prev) => ({ ...prev, [field]: undefined }));
+    setErrors((prev) => ({ ...prev, [field]: undefined, form: undefined }));
+    setPosted(false);
   };
 
   const validate = () => {
@@ -41,23 +40,23 @@ export default function CommentSection({ articleId }) {
     return next;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const found = validate();
     if (Object.keys(found).length) {
       setErrors(found);
       return;
     }
-    setComments((prev) => [
-      ...prev,
-      {
-        id: `${articleId}-${Date.now()}`,
-        name: form.name.trim(),
-        createdAt: new Date().toISOString(),
-        body: form.body.trim(),
-      },
-    ]);
-    setForm({ name: '', email: '', body: '' });
+    setSending(true);
+    try {
+      await postJson('/comments', { articleId, ...form, website: trap });
+      setForm({ name: '', email: '', body: '' });
+      setPosted(true);
+    } catch (err) {
+      setErrors({ form: err.message });
+    } finally {
+      setSending(false);
+    }
   };
 
   const fieldClass = (field) =>
@@ -72,6 +71,10 @@ export default function CommentSection({ articleId }) {
       <h2 className="mb-6 text-2xl font-black">
         Discussion <span className="text-ink-400">({comments.length})</span>
       </h2>
+
+      {comments.length === 0 && (
+        <p className="mb-8 text-sm text-ink-500 dark:text-ink-400">No comments yet. Be the first to share your view.</p>
+      )}
 
       <ul className="mb-10 space-y-5">
         {comments.map((c) => (
@@ -92,7 +95,8 @@ export default function CommentSection({ articleId }) {
         ))}
       </ul>
 
-      <form onSubmit={handleSubmit} noValidate className="surface rounded-xl p-5 sm:p-6">
+      <form onSubmit={handleSubmit} noValidate className="surface relative rounded-xl p-5 sm:p-6">
+        <Honeypot value={trap} onChange={(e) => setTrap(e.target.value)} />
         <h3 className="mb-1 text-xl font-bold">Leave a comment</h3>
         <p className="mb-5 text-sm text-ink-500 dark:text-ink-400">
           Your email address is never published. Comments are moderated before appearing.
@@ -159,11 +163,23 @@ export default function CommentSection({ articleId }) {
           )}
         </div>
 
+        {errors.form && (
+          <p className="mt-4 rounded-lg bg-danger-50 px-3 py-2 text-sm text-danger-700" role="alert">
+            {errors.form}
+          </p>
+        )}
+        {posted && (
+          <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800" role="status">
+            Thank you. Your comment will appear here once the newsroom approves it.
+          </p>
+        )}
+
         <button
           type="submit"
-          className="mt-5 rounded-lg bg-ink-950 px-6 py-2.5 font-display text-sm font-medium uppercase tracking-wide text-white transition hover:bg-brand-700 dark:bg-white dark:text-ink-950 dark:hover:bg-brand-200"
+          disabled={sending}
+          className="mt-5 rounded-lg bg-ink-950 px-6 py-2.5 font-display text-sm font-medium uppercase tracking-wide text-white transition hover:bg-brand-700 disabled:opacity-60 dark:bg-white dark:text-ink-950 dark:hover:bg-brand-200"
         >
-          Post comment
+          {sending ? 'Posting…' : 'Post comment'}
         </button>
       </form>
     </section>

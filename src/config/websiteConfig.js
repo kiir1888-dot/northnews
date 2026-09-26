@@ -11,6 +11,8 @@
  * =============================================================================
  */
 
+import { defaultPages } from './pageContent';
+
 export const websiteConfig = {
   /* ---------------------------------------------------------------------- */
   /* BRAND                                                                   */
@@ -19,27 +21,27 @@ export const websiteConfig = {
     name: 'NORTH i',
     // The name is rendered as two parts so the accent mark can be styled.
     nameParts: { primary: 'NORTH', accent: 'i' },
-    tagline: 'Journalism without a compass bias.',
+    tagline: 'journalism without a compass bias',
     description:
-      'NORTH i is an independent digital newsroom covering politics, technology, business, sport, education and culture. We publish verified reporting, long-form analysis and data journalism for readers who want the full picture — not the loudest headline.',
-    foundedYear: 2016,
+      'NORTH i is an independent digital newsroom covering politics, technology, business, sport, education and culture. We publish verified reporting, long-form analysis and data journalism for readers who want the full picture, not the loudest headline.',
+    foundedYear: 2026,
     legalEntity: 'NORTH i Media Group Ltd.',
     locale: 'en-GB',
-    timeZone: 'Africa/Lagos',
+    timeZone: 'Africa/Juba',
   },
 
   /* ---------------------------------------------------------------------- */
   /* CONTACT                                                                 */
   /* ---------------------------------------------------------------------- */
   contact: {
-    email: 'newsroom@north-i.com',
-    pressEmail: 'press@north-i.com',
-    phone: '+234 (0) 700 66784 41',
+    email: 'newsnorthi08@gmail.com',
+    phone: '+211 929 150 111',
+    whatsappUrl: 'https://wa.me/211929150111',
     address: {
-      line1: '14 Harbour Point, Victoria Island',
-      line2: 'Lagos, Nigeria',
+      line1: 'Alem Building',
+      line2: 'Atlabara, Juba, South Sudan',
     },
-    officeHours: 'Monday – Friday, 08:00 – 18:00 WAT',
+    officeHours: 'Open 24 hours, 7 days a week',
   },
 
   /* ---------------------------------------------------------------------- */
@@ -47,7 +49,7 @@ export const websiteConfig = {
   /* ---------------------------------------------------------------------- */
   socials: [
     { id: 'x', label: 'X / Twitter', href: 'https://x.com/northi' },
-    { id: 'facebook', label: 'Facebook', href: 'https://facebook.com/northi' },
+    { id: 'facebook', label: 'Facebook', href: 'https://www.facebook.com/share/1LbQQDtFjZ/' },
     { id: 'instagram', label: 'Instagram', href: 'https://instagram.com/northi' },
     { id: 'linkedin', label: 'LinkedIn', href: 'https://linkedin.com/company/northi' },
     { id: 'youtube', label: 'YouTube', href: 'https://youtube.com/@northi' },
@@ -63,6 +65,7 @@ export const websiteConfig = {
     { label: 'Business', to: '/category/business' },
     { label: 'Sports', to: '/category/sports' },
     { label: 'Education', to: '/category/education' },
+    { label: 'Events', to: '/events' },
     { label: 'About', to: '/about' },
     { label: 'Contact', to: '/contact' },
   ],
@@ -116,6 +119,8 @@ export const websiteConfig = {
         heading: 'Corporate',
         links: [
           { label: 'About Us', to: '/about' },
+          { label: 'Events', to: '/events' },
+          { label: 'Submit a Story', to: '/submit-story' },
           { label: 'Editorial Policy', to: '/editorial-policy' },
           { label: 'Contact Us', to: '/contact' },
           { label: 'Privacy Policy', to: '/privacy' },
@@ -128,6 +133,35 @@ export const websiteConfig = {
       { label: 'Terms of Use', to: '/privacy' },
     ],
   },
+
+  /* ---------------------------------------------------------------------- */
+  /* ABOUT PAGE                                                              */
+  /* ---------------------------------------------------------------------- */
+  about: {
+    story:
+      'Founded in 2026 and operating as NORTH i Media Group Ltd., we publish from newsrooms across the region with a permanent desk in Atlabara, Juba, South Sudan. Our readers fund a growing share of our reporting, which is why our editorial priorities answer to them first.',
+    values: [
+      {
+        title: 'Verification before velocity',
+        body: 'Every claim is sourced to a document or a named person before publication. If we cannot verify it, we do not run it.',
+      },
+      {
+        title: 'Independence by structure',
+        body: 'No shareholder, advertiser or political party holds editorial veto. Ownership is disclosed in full in our transparency statement.',
+      },
+      {
+        title: 'Corrections in the open',
+        body: 'Errors are corrected on the page with a dated note explaining what changed and why. We never silently edit a published story.',
+      },
+      {
+        title: 'Data you can check',
+        body: 'Where a story rests on a dataset, we publish the source, the methodology and, wherever licensing allows, the data itself.',
+      },
+    ],
+  },
+
+  /* Privacy and Editorial Policy page text (see ./pageContent.js). */
+  pages: defaultPages,
 
   /* ---------------------------------------------------------------------- */
   /* COOKIE CONSENT BANNER                                                   */

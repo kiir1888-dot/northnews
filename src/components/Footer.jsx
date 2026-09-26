@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import NewsletterForm from './NewsletterForm';
 import { useSite } from '../context/SiteContext';
-import { MailIcon, PhoneIcon, PinIcon, socialIconMap } from './Icons';
+import { MailIcon, PinIcon, WhatsAppIcon, socialIconMap } from './Icons';
 
 /**
  * Footer — comprehensive 4-column corporate footer:
@@ -24,8 +24,9 @@ export default function Footer() {
           {/* ------------------------ About Us ------------------------- */}
           <div className="lg:col-span-4">
             <Link to="/" className="mb-4 inline-flex items-center gap-2">
-              <span className="grid h-10 w-10 place-items-center rounded-lg bg-white font-serif text-xl font-bold text-ink-950">
-                N
+              <span className="flex h-10 items-center whitespace-nowrap rounded-lg bg-white px-2.5 font-serif text-sm font-black tracking-tight text-ink-950">
+                NOR
+                <span className="text-[#e10600]">&nbsp;i</span>
               </span>
               <span className="font-serif text-2xl font-black text-white">
                 {brand.nameParts.primary}
@@ -56,10 +57,13 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`}
+                  href={contact.whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  aria-label={`WhatsApp ${contact.phone}`}
                   className="flex items-center gap-2 transition hover:text-white"
                 >
-                  <PhoneIcon className="h-4 w-4 shrink-0 text-brand-300" />
+                  <WhatsAppIcon className="h-4 w-4 shrink-0 text-brand-300" />
                   {contact.phone}
                 </a>
               </li>
@@ -119,7 +123,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-8xl flex-col items-center justify-between gap-3 px-4 py-5 text-xs sm:flex-row">
           <p>
-            © {year} {brand.legalEntity}. All rights reserved. Established {brand.foundedYear}.
+            © {year} {brand.legalEntity} All rights reserved. Established {brand.foundedYear}.
           </p>
           <nav aria-label="Legal" className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {footer.legalLinks.map((l) => (

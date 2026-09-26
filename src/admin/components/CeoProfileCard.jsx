@@ -155,7 +155,7 @@ export default function CeoProfileCard({ profile, onFieldSave, saving }) {
               className="group/field mt-3 block w-full rounded-md p-1 text-left transition hover:bg-brand-50"
             >
               <p className="whitespace-pre-line text-sm leading-relaxed text-ink-600">
-                {profile.message || 'No message added yet — click to write one.'}
+                {profile.message || 'No message added yet. Click to write one.'}
               </p>
               <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-brand-500 opacity-0 transition group-hover/field:opacity-100">
                 <PencilIcon className="h-3 w-3" />

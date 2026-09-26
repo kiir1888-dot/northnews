@@ -22,9 +22,9 @@ export default function LegalPage({ breadcrumb, kicker, title, intro, sections, 
         <p className="mt-6 text-lg leading-8 text-ink-700 dark:text-ink-200">{intro}</p>
 
         <div className="mt-10 space-y-9">
-          {sections.map((section) => (
-            <section key={section.heading}>
-              <h2 className="mb-3 text-xl font-bold">{section.heading}</h2>
+          {sections.map((section, idx) => (
+            <section key={`${idx}-${section.heading}`}>
+              {section.heading && <h2 className="mb-3 text-xl font-bold">{section.heading}</h2>}
               {section.paragraphs.map((p, i) => (
                 <p key={i} className="mb-3 text-[1.0625rem] leading-8 text-ink-700 dark:text-ink-200">
                   {p}

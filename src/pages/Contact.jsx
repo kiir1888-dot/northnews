@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Breadcrumbs from '../components/Breadcrumbs';
+import Honeypot from '../components/Honeypot';
 import { useSite } from '../context/SiteContext';
-import { CheckIcon, MailIcon, PhoneIcon, PinIcon, ClockIcon } from '../components/Icons';
+import { emailNewsroom, postJson } from '../lib/publicApi';
+import { CheckIcon, MailIcon, PinIcon, ClockIcon, WhatsAppIcon } from '../components/Icons';
 
 const subjects = [
   'News tip',
@@ -18,15 +21,17 @@ export default function Contact() {
   const { contact } = config;
 
   const [form, setForm] = useState({ name: '', email: '', subject: subjects[0], message: '' });
+  const [trap, setTrap] = useState('');
   const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const update = (field) => (e) => {
     setForm((f) => ({ ...f, [field]: e.target.value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const next = {};
     if (!form.name.trim()) next.name = 'Please tell us your name.';
@@ -39,8 +44,24 @@ export default function Contact() {
       setErrors(next);
       return;
     }
-    setSent(true);
-    setForm({ name: '', email: '', subject: subjects[0], message: '' });
+    setSending(true);
+    try {
+      await postJson('/contact', { ...form, website: trap });
+      if (!trap) {
+        emailNewsroom({
+          subject: `New message: ${form.subject}`,
+          name: form.name,
+          email: form.email,
+          fields: { Topic: form.subject, message: form.message },
+        });
+      }
+      setSent(true);
+      setForm({ name: '', email: '', subject: subjects[0], message: '' });
+    } catch (err) {
+      setErrors({ form: err.message });
+    } finally {
+      setSending(false);
+    }
   };
 
   const fieldClass = (field) =>
@@ -59,8 +80,14 @@ export default function Contact() {
             <p className="kicker mb-2">Get in touch</p>
             <h1 className="text-3xl font-black leading-tight sm:text-4xl">Contact Us</h1>
             <p className="mt-4 text-base leading-7 text-ink-600 dark:text-ink-300">
-              Story tips, corrections, partnership enquiries or feedback — the newsroom reads
+              Send us story tips, corrections, partnership enquiries or feedback. The newsroom reads
               everything that arrives here. We aim to respond within two working days.
+            </p>
+            <p className="mt-3 text-sm text-ink-600 dark:text-ink-300">
+              Have a full story, photos or evidence to share?{' '}
+              <Link to="/submit-story" className="font-medium text-brand-600 underline underline-offset-2 dark:text-brand-300">
+                Submit a story
+              </Link>
             </p>
 
             <ul className="mt-8 space-y-5">
@@ -75,26 +102,21 @@ export default function Contact() {
                   <a href={`mailto:${contact.email}`} className="font-medium hover:text-brand-600">
                     {contact.email}
                   </a>
-                  <br />
-                  <a
-                    href={`mailto:${contact.pressEmail}`}
-                    className="text-sm text-ink-600 hover:text-brand-600 dark:text-ink-300"
-                  >
-                    {contact.pressEmail} (press)
-                  </a>
                 </div>
               </li>
 
               <li className="flex gap-3">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-ink-100 text-brand-600 dark:bg-ink-800 dark:text-brand-300">
-                  <PhoneIcon className="h-5 w-5" />
+                  <WhatsAppIcon className="h-5 w-5" />
                 </span>
                 <div>
                   <p className="font-display text-xs uppercase tracking-wider text-ink-500 dark:text-ink-400">
-                    Phone
+                    WhatsApp
                   </p>
                   <a
-                    href={`tel:${contact.phone.replace(/[^+\d]/g, '')}`}
+                    href={contact.whatsappUrl}
+                    target="_blank"
+                    rel="noreferrer noopener"
                     className="font-medium hover:text-brand-600"
                   >
                     {contact.phone}
@@ -139,7 +161,7 @@ export default function Contact() {
                   </span>
                   <h2 className="text-2xl font-bold">Message received</h2>
                   <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-ink-600 dark:text-ink-300">
-                    Thank you — a member of the newsroom will respond within two working days.
+                    Thank you. A member of the newsroom will respond within two working days.
                   </p>
                   <button
                     type="button"
@@ -150,7 +172,8 @@ export default function Contact() {
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} noValidate>
+                <form onSubmit={handleSubmit} noValidate className="relative">
+                  <Honeypot value={trap} onChange={(e) => setTrap(e.target.value)} />
                   <h2 className="mb-1 text-2xl font-bold">Send us a message</h2>
                   <p className="mb-6 text-sm text-ink-500 dark:text-ink-400">
                     Fields marked with an asterisk are required.
@@ -233,11 +256,18 @@ export default function Contact() {
                     )}
                   </div>
 
+                  {errors.form && (
+                    <p className="mt-4 rounded-lg bg-danger-50 px-3 py-2 text-sm text-danger-700" role="alert">
+                      {errors.form}
+                    </p>
+                  )}
+
                   <button
                     type="submit"
-                    className="mt-6 w-full rounded-lg bg-ink-950 px-6 py-3 font-display text-sm font-medium uppercase tracking-wide text-white transition hover:bg-brand-700 sm:w-auto dark:bg-white dark:text-ink-950 dark:hover:bg-brand-200"
+                    disabled={sending}
+                    className="mt-6 w-full rounded-lg bg-ink-950 px-6 py-3 font-display text-sm font-medium uppercase tracking-wide text-white transition hover:bg-brand-700 disabled:opacity-60 sm:w-auto dark:bg-white dark:text-ink-950 dark:hover:bg-brand-200"
                   >
-                    Send message
+                    {sending ? 'Sending…' : 'Send message'}
                   </button>
                 </form>
               )}

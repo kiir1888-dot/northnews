@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { websiteConfig } from '../config/websiteConfig';
+import { applySettings } from '../config/siteSettings';
 import { fetchNews, searchNews } from '../data/newsData';
 import { fetchCeoProfile, fetchTeam } from '../data/siteData';
 
@@ -27,6 +28,21 @@ export function SiteProvider({ children }) {
   // Static brand/contact/nav config; CEO and team data are fetched
   // separately below since they come from the live admin-managed backend.
   const [config, setConfig] = useState(websiteConfig);
+
+  // Apply text saved from the dashboard's Site settings page on top of the
+  // built-in defaults.
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/settings')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.settings) setConfig(applySettings(websiteConfig, data.settings));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /** Shallow-merge a partial config patch, e.g. updateConfig({ brand: {...} }). */
   const updateConfig = useCallback((patch) => {

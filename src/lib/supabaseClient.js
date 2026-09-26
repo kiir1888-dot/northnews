@@ -8,7 +8,7 @@ if (!isSupabaseConfigured) {
   // eslint-disable-next-line no-console
   console.warn(
     '[northi] VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are not set. Admin sign-in will not work ' +
-      'until these are configured — see .env.example.'
+      'until these are configured. See .env.example.'
   );
 }
 

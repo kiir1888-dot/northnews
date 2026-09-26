@@ -13,7 +13,7 @@ import { formatDate } from '../utils/format';
  * the comment thread. Content comes entirely from what the admin published.
  */
 export default function Article() {
-  const { id } = useParams();
+  const { slug: id } = useParams();
   const { newsItems, newsLoading } = useSite();
   const article = newsItems.find((n) => String(n.id) === id);
 

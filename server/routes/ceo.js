@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db.js';
-import { requireAuth } from '../auth.js';
+import { requireAuth, requireAdmin } from '../auth.js';
 import { upload, deleteUploadedFile } from '../upload.js';
 
 const router = Router();
@@ -22,8 +22,8 @@ router.get('/', (req, res) => {
   res.json({ profile: toPublicProfile(row) });
 });
 
-// Updating the profile is admin-only.
-router.use(requireAuth);
+// Updating the profile is limited to the Admin role.
+router.use(requireAuth, requireAdmin);
 
 router.put('/', upload.single('image'), (req, res) => {
   const existing = db.prepare('SELECT * FROM ceo_profile WHERE id = 1').get();

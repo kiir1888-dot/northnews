@@ -34,7 +34,7 @@ router.get('/', (req, res) => {
   res.json({ news: rows.map(toPublicNews), categories: NEWS_CATEGORIES });
 });
 
-// Everything below (create/update/delete) is admin-only.
+// Everything below (create/update/delete) needs a dashboard login (Admin or Editor).
 router.use(requireAuth);
 
 router.post('/', upload.single('image'), (req, res) => {

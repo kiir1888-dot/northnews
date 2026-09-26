@@ -2,10 +2,9 @@ import { Router } from 'express';
 import { db } from '../db.js';
 import { requireAuth } from '../auth.js';
 import { upload, deleteUploadedFile } from '../upload.js';
+import { clean, isBot, isEmail, rateLimit } from '../publicForm.js';
 
 const router = Router();
-
-router.use(requireAuth);
 
 function toPublicEvent(row) {
   return {
@@ -22,10 +21,41 @@ function toPublicEvent(row) {
   };
 }
 
+// Public: the website's Events page lists everything the newsroom published.
 router.get('/', (req, res) => {
   const rows = db.prepare('SELECT * FROM events ORDER BY start_date ASC, id DESC').all();
   res.json({ events: rows.map(toPublicEvent) });
 });
+
+// Public: a reader registers for an event.
+router.post('/:id/signup', rateLimit({ max: 6 }), (req, res) => {
+  if (isBot(req.body)) return res.status(201).json({ ok: true });
+
+  const id = Number(req.params.id);
+  const event = db.prepare('SELECT * FROM events WHERE id = ?').get(id);
+  if (!event) return res.status(404).json({ message: 'This event no longer exists.' });
+
+  const lastDay = event.end_date || event.start_date;
+  if (lastDay && lastDay < new Date().toISOString().slice(0, 10)) {
+    return res.status(400).json({ message: 'Registration for this event has closed.' });
+  }
+
+  const name = clean(req.body?.name, 120);
+  const email = clean(req.body?.email, 254);
+  if (!name) return res.status(400).json({ message: 'Please enter your name.' });
+  if (!isEmail(email)) return res.status(400).json({ message: 'Please enter a valid email address.' });
+
+  const already = db
+    .prepare('SELECT id FROM event_signups WHERE event_id = ? AND email = ? COLLATE NOCASE')
+    .get(id, email);
+  if (!already) {
+    db.prepare('INSERT INTO event_signups (event_id, name, email) VALUES (?, ?, ?)').run(id, name, email);
+  }
+  return res.status(201).json({ ok: true });
+});
+
+// Everything below (create/update/delete) needs a dashboard login (Admin or Editor).
+router.use(requireAuth);
 
 router.post('/', upload.single('image'), (req, res) => {
   const { title, startDate, endDate, time, location, description } = req.body;

@@ -1,17 +1,33 @@
 import { NavLink } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
-import { UsersIcon, InboxIcon, LifeBuoyIcon, MegaphoneIcon, LayersIcon, LogOutIcon } from './Icons';
+import {
+  UsersIcon,
+  InboxIcon,
+  LifeBuoyIcon,
+  MegaphoneIcon,
+  LayersIcon,
+  LogOutIcon,
+  ShieldIcon,
+  KeyIcon,
+  ChatIcon,
+  CogIcon,
+} from './Icons';
 
 const NAV_ITEMS = [
-  { to: 'subscribers', label: 'Subscribers', subtitle: 'Reader accounts & directory', icon: UsersIcon },
-  { to: 'submissions', label: 'Submissions', subtitle: 'Editorial review pipeline', icon: InboxIcon },
-  { to: 'support', label: 'Support', subtitle: 'Reader inbox & tickets', icon: LifeBuoyIcon },
-  { to: 'newsletters', label: 'Newsletters', subtitle: 'Bulletins & broadcasts', icon: MegaphoneIcon },
-  { to: 'content', label: 'Content', subtitle: 'Site & news', icon: LayersIcon },
+  { to: 'content', label: 'Content', subtitle: 'News, events & team', icon: LayersIcon },
+  { to: 'comments', label: 'Comments', subtitle: 'Approve reader comments', icon: ChatIcon },
+  { to: 'submissions', label: 'Submissions', subtitle: 'Stories sent by readers', icon: InboxIcon },
+  { to: 'support', label: 'Support', subtitle: 'Contact form messages', icon: LifeBuoyIcon },
+  { to: 'subscribers', label: 'Subscribers', subtitle: 'Newsletter sign-ups', icon: UsersIcon, adminOnly: true },
+  { to: 'newsletters', label: 'Newsletters', subtitle: 'Write & send bulletins', icon: MegaphoneIcon, adminOnly: true },
+  { to: 'settings', label: 'Site settings', subtitle: 'Contact, socials & page text', icon: CogIcon, adminOnly: true },
+  { to: 'editors', label: 'Editors', subtitle: 'Dashboard access & roles', icon: ShieldIcon, adminOnly: true },
 ];
 
 export default function Sidebar() {
   const { user, logout } = useAdminAuth();
+  const navItems = NAV_ITEMS.filter((item) => !item.adminOnly || user?.role === 'admin');
+  const roleLabel = user?.isOwner ? 'Owner' : user?.role;
 
   return (
     <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-brand-100 bg-white">
@@ -21,7 +37,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {NAV_ITEMS.map(({ to, label, subtitle, icon: Icon }) => (
+        {navItems.map(({ to, label, subtitle, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
@@ -55,9 +71,22 @@ export default function Sidebar() {
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-ink-900">{user?.email}</p>
-            <p className="truncate text-xs capitalize text-ink-400">{user?.role}</p>
+            <p className="truncate text-xs capitalize text-ink-400">{roleLabel}</p>
           </div>
         </div>
+        <NavLink
+          to="account"
+          className={({ isActive }) =>
+            `mb-2 flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+              isActive
+                ? 'border-brand-300 bg-brand-50 text-brand-700'
+                : 'border-ink-200 bg-white text-ink-600 hover:border-brand-200 hover:text-brand-700'
+            }`
+          }
+        >
+          <KeyIcon className="h-4 w-4" />
+          Change password
+        </NavLink>
         <button
           type="button"
           onClick={logout}

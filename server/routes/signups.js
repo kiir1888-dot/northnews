@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { db } from '../db.js';
-import { requireAuth } from '../auth.js';
+import { requireAuth, requireAdmin } from '../auth.js';
 
 const router = Router();
 
-router.use(requireAuth);
+// Signups contain readers' personal details, so only admins can see them.
+router.use(requireAuth, requireAdmin);
 
 router.get('/', (req, res) => {
   const rows = db

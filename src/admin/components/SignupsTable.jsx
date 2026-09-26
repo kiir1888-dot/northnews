@@ -27,7 +27,7 @@ export default function SignupsTable({ signups, onDelete }) {
             <tr key={s.id} className="transition hover:bg-brand-50/40">
               <td className="px-4 py-3 font-medium text-ink-900">{s.name}</td>
               <td className="px-4 py-3 text-ink-600">{s.email}</td>
-              <td className="px-4 py-3 text-ink-600">{s.eventTitle || '—'}</td>
+              <td className="px-4 py-3 text-ink-600">{s.eventTitle || 'Not set'}</td>
               <td className="px-4 py-3 text-ink-500">{formatDateTime(s.createdAt)}</td>
               <td className="px-4 py-3 text-right">
                 <button

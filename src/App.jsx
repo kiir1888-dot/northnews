@@ -10,6 +10,9 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import EditorialPolicy from './pages/EditorialPolicy';
 import Privacy from './pages/Privacy';
+import Events from './pages/Events';
+import SubmitStory from './pages/SubmitStory';
+import Unsubscribe from './pages/Unsubscribe';
 import NotFound from './pages/NotFound';
 
 /**
@@ -39,6 +42,9 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/editorial-policy" element={<EditorialPolicy />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/submit-story" element={<SubmitStory />} />
+          <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

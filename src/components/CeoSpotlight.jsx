@@ -34,15 +34,15 @@ export default function CeoSpotlight() {
     <section aria-label="About the owner" className="mx-auto max-w-8xl px-4 py-10">
       <div className="overflow-hidden rounded-2xl bg-ink-950 text-white dark:bg-brand-950">
         <div className="grid items-stretch gap-0 lg:grid-cols-12">
-          {/* Portrait — object-cover protects the layout from any aspect ratio */}
+          {/* Portrait — cropped toward the top so the subject's head stays in frame */}
           <div className="relative lg:col-span-4">
-            <div className="aspect-[4/3] h-full w-full bg-ink-800 sm:aspect-[16/9] lg:aspect-auto lg:min-h-[26rem]">
+            <div className="aspect-[4/5] h-full w-full bg-ink-800 sm:aspect-[4/3] lg:aspect-auto lg:min-h-[26rem]">
               {ceoProfile.imagePath ? (
                 <img
                   src={ceoProfile.imagePath}
                   alt={ceoProfile.name}
                   loading="lazy"
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover object-[50%_15%]"
                 />
               ) : (
                 <div

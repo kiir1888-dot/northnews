@@ -62,7 +62,84 @@ db.exec(`
     image_path TEXT,
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
+
+  -- Dashboard accounts added from the Editors page. Owners listed in the
+  -- ADMIN_EMAILS env var are not stored here; they always have admin access.
+  CREATE TABLE IF NOT EXISTS admin_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    role TEXT NOT NULL CHECK (role IN ('admin', 'editor')),
+    added_by TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS contact_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    subject TEXT,
+    message TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'read', 'resolved')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS subscribers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    token TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'unsubscribed')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    unsubscribed_at TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS newsletters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject TEXT NOT NULL,
+    body TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'sent')),
+    sent_count INTEGER NOT NULL DEFAULT 0,
+    sent_at TEXT,
+    created_by TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    article_id INTEGER NOT NULL REFERENCES news(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    body TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT,
+    headline TEXT NOT NULL,
+    story TEXT NOT NULL,
+    image_path TEXT,
+    status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'reviewing', 'accepted', 'rejected')),
+    notes TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  -- Editable website text (contact details, socials, page copy). Stored as a
+  -- single JSON document under the key 'site'.
+  CREATE TABLE IF NOT EXISTS site_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
+
+db.exec('PRAGMA foreign_keys = ON;');
 
 // Migration: older databases were created before `news.category` existed.
 // Add it in place (defaulting existing rows to "General") instead of
@@ -107,7 +184,7 @@ if (ceoCount === 0) {
   ).run(
     'Alex Morgan',
     'CEO & Founder',
-    'Welcome to NORTH i. We started this newsroom to bring honest, independent reporting to our community — thank you for reading and supporting our mission.',
+    'Welcome to NORTH i. We started this newsroom to bring honest, independent reporting to our community. Thank you for reading and supporting our mission.',
     null
   );
 }

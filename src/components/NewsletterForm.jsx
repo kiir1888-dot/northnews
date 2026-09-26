@@ -1,25 +1,34 @@
 import { useState } from 'react';
 import { cx } from '../utils/format';
+import { postJson } from '../lib/publicApi';
 import { CheckIcon } from './Icons';
+import Honeypot from './Honeypot';
 
-/**
- * NewsletterForm — accessible email capture with inline validation.
- * Submission is simulated; wire `onSubmit` to a real endpoint when available.
- */
+/** NewsletterForm — accessible email capture that saves to the subscriber list. */
 export default function NewsletterForm({ variant = 'light', className }) {
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('idle'); // idle | error | success
+  const [trap, setTrap] = useState('');
+  const [status, setStatus] = useState('idle'); // idle | sending | error | success
+  const [errorText, setErrorText] = useState('');
   const isDark = variant === 'dark';
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const valid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
     if (!valid) {
+      setErrorText('Please enter a valid email address.');
       setStatus('error');
       return;
     }
-    setStatus('success');
-    setEmail('');
+    setStatus('sending');
+    try {
+      await postJson('/subscribers', { email: email.trim(), website: trap });
+      setStatus('success');
+      setEmail('');
+    } catch (err) {
+      setErrorText(err.message);
+      setStatus('error');
+    }
   };
 
   if (status === 'success') {
@@ -33,13 +42,14 @@ export default function NewsletterForm({ variant = 'light', className }) {
         role="status"
       >
         <CheckIcon className="h-5 w-5 shrink-0" />
-        You’re subscribed. Look out for tomorrow’s briefing.
+        You’re subscribed. Look out for our next briefing.
       </p>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className={cx('flex flex-col gap-2', className)} noValidate>
+    <form onSubmit={handleSubmit} className={cx('relative flex flex-col gap-2', className)} noValidate>
+      <Honeypot value={trap} onChange={(e) => setTrap(e.target.value)} />
       <label htmlFor={`newsletter-${variant}`} className="sr-only">
         Email address
       </label>
@@ -64,19 +74,20 @@ export default function NewsletterForm({ variant = 'light', className }) {
         />
         <button
           type="submit"
+          disabled={status === 'sending'}
           className={cx(
-            'shrink-0 rounded-lg px-5 py-2.5 font-display text-sm font-medium uppercase tracking-wide transition',
+            'shrink-0 rounded-lg px-5 py-2.5 font-display text-sm font-medium uppercase tracking-wide transition disabled:opacity-60',
             isDark
               ? 'bg-white text-ink-950 hover:bg-brand-200'
               : 'bg-ink-950 text-white hover:bg-brand-700 dark:bg-white dark:text-ink-950 dark:hover:bg-brand-200'
           )}
         >
-          Subscribe
+          {status === 'sending' ? 'Subscribing…' : 'Subscribe'}
         </button>
       </div>
       {status === 'error' && (
         <p className="text-xs text-accent-500" role="alert">
-          Please enter a valid email address.
+          {errorText}
         </p>
       )}
       <p className={cx('text-xs', isDark ? 'text-ink-400' : 'text-ink-500 dark:text-ink-400')}>

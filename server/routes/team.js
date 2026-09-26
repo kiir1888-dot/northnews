@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db.js';
-import { requireAuth } from '../auth.js';
+import { requireAuth, requireAdmin } from '../auth.js';
 import { upload, deleteUploadedFile } from '../upload.js';
 
 const router = Router();
@@ -23,8 +23,8 @@ router.get('/', (req, res) => {
   res.json({ members: rows.map(toPublicMember) });
 });
 
-// Everything below (create/update/delete) is admin-only.
-router.use(requireAuth);
+// Everything below (create/update/delete) is limited to the Admin role.
+router.use(requireAuth, requireAdmin);
 
 router.post('/', upload.single('image'), (req, res) => {
   const { name, role } = req.body;

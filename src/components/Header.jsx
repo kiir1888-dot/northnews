@@ -118,15 +118,16 @@ export default function Header() {
         <div className="mx-auto flex max-w-8xl items-center justify-between gap-4 px-4 py-3">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2" aria-label={`${brand.name} home`}>
-            <span className="grid h-10 w-10 place-items-center rounded-lg bg-ink-950 font-serif text-xl font-bold text-white dark:bg-white dark:text-ink-950">
-              N
+            <span className="flex h-10 items-center whitespace-nowrap rounded-lg bg-ink-950 px-2.5 font-serif text-sm font-black tracking-tight text-white dark:bg-white dark:text-ink-950">
+              NOR
+              <span className="text-[#e10600]">&nbsp;i</span>
             </span>
             <span className="leading-none">
               <span className="font-serif text-2xl font-black tracking-tight">
                 {brand.nameParts.primary}
                 <span className="text-accent-500"> {brand.nameParts.accent}</span>
               </span>
-              <span className="mt-0.5 hidden font-display text-[10px] uppercase tracking-[0.22em] text-ink-500 dark:text-ink-400 sm:block">
+              <span className="mt-0.5 hidden font-display text-[11px] lowercase tracking-[0.12em] text-ink-500 dark:text-ink-400 sm:block">
                 {brand.tagline}
               </span>
             </span>
@@ -246,7 +247,7 @@ export default function Header() {
           {breakingNews.length === 0 ? (
             <div className="flex items-center py-2 pl-6">
               <span className="whitespace-nowrap text-sm text-ink-500 dark:text-ink-400">
-                Stay tuned — the latest headlines will appear here as soon as they’re published.
+                Stay tuned. The latest headlines will appear here as soon as they’re published.
               </span>
             </div>
           ) : (

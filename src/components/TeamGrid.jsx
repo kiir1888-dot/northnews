@@ -37,8 +37,8 @@ export default function TeamGrid({ showHeading = true }) {
           title="Editorial Team"
           description={
             teamMembers.length > 0
-              ? `The ${teamMembers.length} editors, reporters and producers responsible for what you read on ${config.brand.name}.`
-              : `The people behind ${config.brand.name}.`
+              ? `The ${teamMembers.length} editors, reporters and producers responsible for what you read on ${config.brand.name}`
+              : `The people behind ${config.brand.name}`
           }
         />
       )}

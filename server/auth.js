@@ -1,15 +1,16 @@
-import { supabaseAdmin, isAllowedAdminEmail } from './supabaseAdmin.js';
+import { supabaseAdmin, getDashboardRole, isOwnerEmail } from './supabaseAdmin.js';
 
 /**
- * Express middleware: verifies the Supabase Auth access token sent as
- * `Authorization: Bearer <token>` and rejects the request unless it belongs
- * to an email on the admin allowlist (see `isAllowedAdminEmail`).
+ * Express middleware: verifies the Supabase Auth access token sent in the
+ * Authorization header (Bearer scheme) and rejects the request unless the
+ * email has dashboard access (an owner from ADMIN_EMAILS, or someone added
+ * on the Editors page). Attaches `req.user = { id, email, role, isOwner }`.
  */
 export async function requireAuth(req, res, next) {
   if (!supabaseAdmin) {
     return res
       .status(503)
-      .json({ message: 'Admin login is not configured yet — set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.' });
+      .json({ message: 'Admin login is not configured yet. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.' });
   }
 
   const header = req.headers.authorization || '';
@@ -25,10 +26,19 @@ export async function requireAuth(req, res, next) {
   }
 
   const email = data.user.email || '';
-  if (!isAllowedAdminEmail(email)) {
+  const role = getDashboardRole(email);
+  if (!role) {
     return res.status(403).json({ message: 'This account is not authorized for admin access.' });
   }
 
-  req.user = { id: data.user.id, email, role: 'admin' };
+  req.user = { id: data.user.id, email, role, isOwner: isOwnerEmail(email) };
+  return next();
+}
+
+/** Use after `requireAuth`: limits a route to the Admin role (Editors get 403). */
+export function requireAdmin(req, res, next) {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Only admins can do this.' });
+  }
   return next();
 }
