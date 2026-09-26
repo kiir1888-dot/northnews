@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db.js';
 import { requireAuth } from '../auth.js';
-import { upload, deleteUploadedFile } from '../upload.js';
+import { upload, storeImage, deleteUploadedFile } from '../upload.js';
 
 const router = Router();
 
@@ -29,32 +29,37 @@ function toPublicNews(row) {
 
 // Reading news is public — the site's homepage and article pages render
 // whatever the admin has published, without requiring a login.
-router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM news ORDER BY date DESC, id DESC').all();
+router.get('/', async (req, res) => {
+  const rows = await db.all('SELECT * FROM news ORDER BY date DESC NULLS LAST, id DESC');
   res.json({ news: rows.map(toPublicNews), categories: NEWS_CATEGORIES });
 });
 
 // Everything below (create/update/delete) needs a dashboard login (Admin or Editor).
 router.use(requireAuth);
 
-router.post('/', upload.single('image'), (req, res) => {
+router.post('/', upload.single('image'), async (req, res) => {
   const { title, date, description, category } = req.body;
   if (!title || !title.trim()) {
     return res.status(400).json({ message: 'Title is required.' });
   }
-  const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+  const imagePath = await storeImage(req.file);
 
-  const result = db
-    .prepare('INSERT INTO news (title, date, category, description, image_path) VALUES (?, ?, ?, ?, ?)')
-    .run(title.trim(), date || null, normalizeCategory(category), description || null, imagePath);
+  const id = await db.insert(
+    'INSERT INTO news (title, date, category, description, image_path) VALUES (?, ?, ?, ?, ?)',
+    title.trim(),
+    date || null,
+    normalizeCategory(category),
+    description || null,
+    imagePath
+  );
 
-  const row = db.prepare('SELECT * FROM news WHERE id = ?').get(Number(result.lastInsertRowid));
+  const row = await db.get('SELECT * FROM news WHERE id = ?', id);
   return res.status(201).json({ item: toPublicNews(row) });
 });
 
-router.put('/:id', upload.single('image'), (req, res) => {
+router.put('/:id', upload.single('image'), async (req, res) => {
   const id = Number(req.params.id);
-  const existing = db.prepare('SELECT * FROM news WHERE id = ?').get(id);
+  const existing = await db.get('SELECT * FROM news WHERE id = ?', id);
   if (!existing) {
     return res.status(404).json({ message: 'News item not found.' });
   }
@@ -66,29 +71,35 @@ router.put('/:id', upload.single('image'), (req, res) => {
 
   let imagePath = existing.image_path;
   if (req.file) {
-    deleteUploadedFile(existing.image_path);
-    imagePath = `/uploads/${req.file.filename}`;
+    imagePath = await storeImage(req.file);
+    await deleteUploadedFile(existing.image_path);
   } else if (removeImage === 'true') {
-    deleteUploadedFile(existing.image_path);
+    await deleteUploadedFile(existing.image_path);
     imagePath = null;
   }
 
-  db.prepare(
-    `UPDATE news SET title = ?, date = ?, category = ?, description = ?, image_path = ?, updated_at = datetime('now') WHERE id = ?`
-  ).run(title.trim(), date || null, normalizeCategory(category), description || null, imagePath, id);
+  await db.run(
+    `UPDATE news SET title = ?, date = ?, category = ?, description = ?, image_path = ?, updated_at = datetime('now') WHERE id = ?`,
+    title.trim(),
+    date || null,
+    normalizeCategory(category),
+    description || null,
+    imagePath,
+    id
+  );
 
-  const row = db.prepare('SELECT * FROM news WHERE id = ?').get(id);
+  const row = await db.get('SELECT * FROM news WHERE id = ?', id);
   return res.json({ item: toPublicNews(row) });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const existing = db.prepare('SELECT * FROM news WHERE id = ?').get(id);
+  const existing = await db.get('SELECT * FROM news WHERE id = ?', id);
   if (!existing) {
     return res.status(404).json({ message: 'News item not found.' });
   }
-  db.prepare('DELETE FROM news WHERE id = ?').run(id);
-  deleteUploadedFile(existing.image_path);
+  await db.run('DELETE FROM news WHERE id = ?', id);
+  await deleteUploadedFile(existing.image_path);
   return res.status(204).end();
 });
 

@@ -21,7 +21,7 @@ function toPublic(row) {
 }
 
 // Public: the Contact Us form on the website.
-router.post('/', rateLimit({ max: 5 }), (req, res) => {
+router.post('/', rateLimit({ max: 5 }), async (req, res) => {
   if (isBot(req.body)) return res.status(201).json({ ok: true });
 
   const name = clean(req.body.name, 120);
@@ -33,39 +33,42 @@ router.post('/', rateLimit({ max: 5 }), (req, res) => {
   if (!isEmail(email)) return res.status(400).json({ message: 'Please enter a valid email address.' });
   if (message.length < 20) return res.status(400).json({ message: 'Please give us at least 20 characters of detail.' });
 
-  db.prepare('INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)').run(
+  await db.run(
+    'INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
     name,
     email,
     subject || null,
     message
   );
 
-  notifyNewsroom(`New message: ${subject || 'Contact form'}`, `From: ${name} <${email}>\n\n${message}`, email);
+  await notifyNewsroom(`New message: ${subject || 'Contact form'}`, `From: ${name} <${email}>\n\n${message}`, email);
   return res.status(201).json({ ok: true });
 });
 
 // Dashboard (Admins and Editors): the Support inbox.
 router.use(requireAuth);
 
-router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM contact_messages ORDER BY created_at DESC, id DESC').all();
+router.get('/', async (req, res) => {
+  const rows = await db.all('SELECT * FROM contact_messages ORDER BY created_at DESC, id DESC');
   res.json({ messages: rows.map(toPublic) });
 });
 
-router.patch('/:id', (req, res) => {
+router.patch('/:id', async (req, res) => {
   const id = Number(req.params.id);
   const { status } = req.body || {};
   if (!STATUSES.includes(status)) return res.status(400).json({ message: 'Invalid status.' });
-  const result = db
-    .prepare("UPDATE contact_messages SET status = ?, updated_at = datetime('now') WHERE id = ?")
-    .run(status, id);
+  const result = await db.run(
+    "UPDATE contact_messages SET status = ?, updated_at = datetime('now') WHERE id = ?",
+    status,
+    id
+  );
   if (result.changes === 0) return res.status(404).json({ message: 'Message not found.' });
-  const row = db.prepare('SELECT * FROM contact_messages WHERE id = ?').get(id);
+  const row = await db.get('SELECT * FROM contact_messages WHERE id = ?', id);
   return res.json({ message: toPublic(row) });
 });
 
-router.delete('/:id', (req, res) => {
-  const result = db.prepare('DELETE FROM contact_messages WHERE id = ?').run(Number(req.params.id));
+router.delete('/:id', async (req, res) => {
+  const result = await db.run('DELETE FROM contact_messages WHERE id = ?', Number(req.params.id));
   if (result.changes === 0) return res.status(404).json({ message: 'Message not found.' });
   return res.status(204).end();
 });

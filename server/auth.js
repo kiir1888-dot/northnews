@@ -26,7 +26,7 @@ export async function requireAuth(req, res, next) {
   }
 
   const email = data.user.email || '';
-  const role = getDashboardRole(email);
+  const role = await getDashboardRole(email);
   if (!role) {
     return res.status(403).json({ message: 'This account is not authorized for admin access.' });
   }

@@ -6,7 +6,7 @@ import { CheckIcon } from '../components/Icons';
 import { emailNewsroom, postForm } from '../lib/publicApi';
 
 const EMPTY = { name: '', email: '', phone: '', headline: '', story: '' };
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
 /** SubmitStory — readers and freelance writers send stories to the newsroom. */
 export default function SubmitStory() {
@@ -29,7 +29,7 @@ export default function SubmitStory() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim())) next.email = 'Please enter a valid email address.';
     if (!form.headline.trim()) next.headline = 'Please give your story a headline.';
     if (form.story.trim().length < 50) next.story = 'Please describe the story in at least 50 characters.';
-    if (image && image.size > MAX_IMAGE_BYTES) next.image = 'The photo must be smaller than 5 MB.';
+    if (image && image.size > MAX_IMAGE_BYTES) next.image = 'The photo must be smaller than 4 MB.';
     if (Object.keys(next).length) {
       setErrors(next);
       return;
@@ -177,7 +177,7 @@ export default function SubmitStory() {
 
               <div>
                 <label htmlFor="s-image" className="mb-1.5 block text-sm font-medium">
-                  Photo (optional, up to 5 MB)
+                  Photo (optional, up to 4 MB)
                 </label>
                 <input
                   id="s-image"

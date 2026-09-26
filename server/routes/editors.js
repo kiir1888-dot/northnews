@@ -26,7 +26,7 @@ function isAccountExistsError(error) {
   return error?.code === 'email_exists' || /already (been )?registered/i.test(error?.message || '');
 }
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const owners = getOwnerEmails().map((email) => ({
     id: `owner:${email}`,
     email,
@@ -35,7 +35,7 @@ router.get('/', (req, res) => {
     addedBy: null,
     createdAt: null,
   }));
-  const rows = db.prepare('SELECT * FROM admin_users ORDER BY created_at DESC, id DESC').all();
+  const rows = await db.all('SELECT * FROM admin_users ORDER BY created_at DESC, id DESC');
   res.json({ editors: [...owners, ...rows.map(toPublicEditor)], currentEmail: req.user.email });
 });
 
@@ -63,7 +63,7 @@ router.post('/', async (req, res) => {
   if (isOwnerEmail(email)) {
     return res.status(409).json({ message: 'This email is an owner and already has full admin access.' });
   }
-  if (db.prepare('SELECT id FROM admin_users WHERE email = ?').get(email)) {
+  if (await db.get('SELECT id FROM admin_users WHERE lower(email) = ?', email)) {
     return res.status(409).json({ message: 'This email already has dashboard access.' });
   }
 
@@ -77,21 +77,24 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ message: error.message || 'Could not create the login account.' });
   }
 
-  const result = db
-    .prepare('INSERT INTO admin_users (email, role, added_by) VALUES (?, ?, ?)')
-    .run(email, role, req.user.email);
-  const row = db.prepare('SELECT * FROM admin_users WHERE id = ?').get(Number(result.lastInsertRowid));
+  const id = await db.insert(
+    'INSERT INTO admin_users (email, role, added_by) VALUES (?, ?, ?)',
+    email,
+    role,
+    req.user.email
+  );
+  const row = await db.get('SELECT * FROM admin_users WHERE id = ?', id);
   return res.status(201).json({ editor: toPublicEditor(row), accountExisted });
 });
 
-router.patch('/:id', (req, res) => {
+router.patch('/:id', async (req, res) => {
   const id = Number(req.params.id);
   const role = String(req.body?.role || '').trim();
   if (!ROLES.includes(role)) {
     return res.status(400).json({ message: 'Choose a role: Admin or Editor.' });
   }
 
-  const existing = db.prepare('SELECT * FROM admin_users WHERE id = ?').get(id);
+  const existing = await db.get('SELECT * FROM admin_users WHERE id = ?', id);
   if (!existing) {
     return res.status(404).json({ message: 'Editor not found.' });
   }
@@ -99,16 +102,16 @@ router.patch('/:id', (req, res) => {
     return res.status(400).json({ message: 'You cannot change your own role.' });
   }
 
-  db.prepare(`UPDATE admin_users SET role = ?, updated_at = datetime('now') WHERE id = ?`).run(role, id);
-  const row = db.prepare('SELECT * FROM admin_users WHERE id = ?').get(id);
+  await db.run(`UPDATE admin_users SET role = ?, updated_at = datetime('now') WHERE id = ?`, role, id);
+  const row = await db.get('SELECT * FROM admin_users WHERE id = ?', id);
   return res.json({ editor: toPublicEditor(row) });
 });
 
 // Removes dashboard access immediately. The person's Supabase login is kept,
 // so they could be re-added later, but it can no longer open the dashboard.
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const existing = db.prepare('SELECT * FROM admin_users WHERE id = ?').get(id);
+  const existing = await db.get('SELECT * FROM admin_users WHERE id = ?', id);
   if (!existing) {
     return res.status(404).json({ message: 'Editor not found.' });
   }
@@ -116,7 +119,7 @@ router.delete('/:id', (req, res) => {
     return res.status(400).json({ message: 'You cannot remove your own access.' });
   }
 
-  db.prepare('DELETE FROM admin_users WHERE id = ?').run(id);
+  await db.run('DELETE FROM admin_users WHERE id = ?', id);
   return res.status(204).end();
 });
 

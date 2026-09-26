@@ -52,8 +52,8 @@ function sanitize(input, shape, pathPrefix = '') {
   return out;
 }
 
-function readSettings() {
-  const row = db.prepare("SELECT value, updated_at FROM site_settings WHERE key = 'site'").get();
+async function readSettings() {
+  const row = await db.get("SELECT value, updated_at FROM site_settings WHERE key = 'site'");
   if (!row) return { settings: {}, updatedAt: null };
   try {
     return { settings: JSON.parse(row.value), updatedAt: row.updated_at };
@@ -63,20 +63,21 @@ function readSettings() {
 }
 
 // Public: the website loads these overrides on top of its built-in defaults.
-router.get('/', (req, res) => {
-  res.json(readSettings());
+router.get('/', async (req, res) => {
+  res.json(await readSettings());
 });
 
-router.put('/', requireAuth, requireAdmin, (req, res) => {
+router.put('/', requireAuth, requireAdmin, async (req, res) => {
   const settings = sanitize(req.body?.settings, SHAPE);
   if (settings.contact?.email === '') {
     return res.status(400).json({ message: 'The contact email cannot be empty.' });
   }
-  db.prepare(
+  await db.run(
     `INSERT INTO site_settings (key, value, updated_at) VALUES ('site', ?, datetime('now'))
-     ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`
-  ).run(JSON.stringify(settings));
-  res.json(readSettings());
+     ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+    JSON.stringify(settings)
+  );
+  res.json(await readSettings());
 });
 
 export default router;

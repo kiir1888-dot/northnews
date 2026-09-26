@@ -17,21 +17,22 @@ function toPublic(row) {
 }
 
 // Public: newsletter sign-up form.
-router.post('/', rateLimit({ max: 8 }), (req, res) => {
+router.post('/', rateLimit({ max: 8 }), async (req, res) => {
   if (isBot(req.body)) return res.status(201).json({ ok: true });
 
   const email = clean(req.body.email, 254);
   if (!isEmail(email)) return res.status(400).json({ message: 'Please enter a valid email address.' });
 
-  const existing = db.prepare('SELECT * FROM subscribers WHERE email = ?').get(email);
+  const existing = await db.get('SELECT * FROM subscribers WHERE lower(email) = lower(?)', email);
   if (existing) {
     if (existing.status !== 'active') {
-      db.prepare("UPDATE subscribers SET status = 'active', unsubscribed_at = NULL WHERE id = ?").run(existing.id);
+      await db.run("UPDATE subscribers SET status = 'active', unsubscribed_at = NULL WHERE id = ?", existing.id);
     }
     return res.status(200).json({ ok: true });
   }
 
-  db.prepare('INSERT INTO subscribers (email, token) VALUES (?, ?)').run(
+  await db.run(
+    'INSERT INTO subscribers (email, token) VALUES (?, ?) ON CONFLICT DO NOTHING',
     email,
     crypto.randomBytes(24).toString('hex')
   );
@@ -39,13 +40,16 @@ router.post('/', rateLimit({ max: 8 }), (req, res) => {
 });
 
 // Public: one-click unsubscribe link from newsletter emails.
-router.post('/unsubscribe', rateLimit({ max: 20 }), (req, res) => {
+router.post('/unsubscribe', rateLimit({ max: 20 }), async (req, res) => {
   const token = clean(req.body?.token, 100);
   if (!token) return res.status(400).json({ message: 'This unsubscribe link is not valid.' });
-  const row = db.prepare('SELECT * FROM subscribers WHERE token = ?').get(token);
+  const row = await db.get('SELECT * FROM subscribers WHERE token = ?', token);
   if (!row) return res.status(404).json({ message: 'This unsubscribe link is not valid or has expired.' });
   if (row.status === 'active') {
-    db.prepare("UPDATE subscribers SET status = 'unsubscribed', unsubscribed_at = datetime('now') WHERE id = ?").run(row.id);
+    await db.run(
+      "UPDATE subscribers SET status = 'unsubscribed', unsubscribed_at = datetime('now') WHERE id = ?",
+      row.id
+    );
   }
   return res.json({ ok: true, email: row.email });
 });
@@ -53,13 +57,13 @@ router.post('/unsubscribe', rateLimit({ max: 20 }), (req, res) => {
 // Dashboard: subscriber emails are personal data, so admins only.
 router.use(requireAuth, requireAdmin);
 
-router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM subscribers ORDER BY created_at DESC, id DESC').all();
+router.get('/', async (req, res) => {
+  const rows = await db.all('SELECT * FROM subscribers ORDER BY created_at DESC, id DESC');
   res.json({ subscribers: rows.map(toPublic) });
 });
 
-router.delete('/:id', (req, res) => {
-  const result = db.prepare('DELETE FROM subscribers WHERE id = ?').run(Number(req.params.id));
+router.delete('/:id', async (req, res) => {
+  const result = await db.run('DELETE FROM subscribers WHERE id = ?', Number(req.params.id));
   if (result.changes === 0) return res.status(404).json({ message: 'Subscriber not found.' });
   return res.status(204).end();
 });

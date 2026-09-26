@@ -43,18 +43,18 @@ export function isOwnerEmail(email) {
 }
 
 /** Returns 'admin', 'editor', or null when the email has no dashboard access. */
-export function getDashboardRole(email) {
+export async function getDashboardRole(email) {
   if (!email) return null;
   if (isOwnerEmail(email)) return 'admin';
 
-  const row = db.prepare('SELECT role FROM admin_users WHERE email = ?').get(email);
+  const row = await db.get('SELECT role FROM admin_users WHERE lower(email) = lower(?)', email);
   if (row) return row.role;
 
   // With no owners and no added users configured, fall back to allowing any
   // authenticated Supabase user as admin. Convenient while first setting
   // things up locally, but ADMIN_EMAILS should be set before deploying.
   if (ownerEmails.length === 0) {
-    const { count } = db.prepare('SELECT COUNT(*) AS count FROM admin_users').get();
+    const { count } = await db.get('SELECT COUNT(*)::int AS count FROM admin_users');
     if (count === 0) return 'admin';
   }
   return null;

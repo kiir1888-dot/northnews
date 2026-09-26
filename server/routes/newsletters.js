@@ -51,60 +51,64 @@ function readInput(body) {
   return { subject, text };
 }
 
-router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM newsletters ORDER BY created_at DESC, id DESC').all();
-  const activeSubscribers = db.prepare("SELECT COUNT(*) AS c FROM subscribers WHERE status = 'active'").get().c;
+router.get('/', async (req, res) => {
+  const rows = await db.all('SELECT * FROM newsletters ORDER BY created_at DESC, id DESC');
+  const { c: activeSubscribers } = await db.get("SELECT COUNT(*)::int AS c FROM subscribers WHERE status = 'active'");
   res.json({ newsletters: rows.map(toPublic), mailConfigured: isMailConfigured(), activeSubscribers });
 });
 
 // Active subscriber emails, used for the "copy emails" fallback when the
 // server cannot send email itself.
-router.get('/recipients', (req, res) => {
-  const rows = db.prepare("SELECT email FROM subscribers WHERE status = 'active' ORDER BY email").all();
+router.get('/recipients', async (req, res) => {
+  const rows = await db.all("SELECT email FROM subscribers WHERE status = 'active' ORDER BY email");
   res.json({ emails: rows.map((r) => r.email) });
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const input = readInput(req.body);
   if (input.error) return res.status(400).json({ message: input.error });
-  const result = db
-    .prepare('INSERT INTO newsletters (subject, body, created_by) VALUES (?, ?, ?)')
-    .run(input.subject, input.text, req.user.email);
-  const row = db.prepare('SELECT * FROM newsletters WHERE id = ?').get(Number(result.lastInsertRowid));
+  const id = await db.insert(
+    'INSERT INTO newsletters (subject, body, created_by) VALUES (?, ?, ?)',
+    input.subject,
+    input.text,
+    req.user.email
+  );
+  const row = await db.get('SELECT * FROM newsletters WHERE id = ?', id);
   return res.status(201).json({ newsletter: toPublic(row) });
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const existing = db.prepare('SELECT * FROM newsletters WHERE id = ?').get(id);
+  const existing = await db.get('SELECT * FROM newsletters WHERE id = ?', id);
   if (!existing) return res.status(404).json({ message: 'Newsletter not found.' });
   if (existing.status === 'sent') return res.status(409).json({ message: 'A sent newsletter cannot be edited.' });
   const input = readInput(req.body);
   if (input.error) return res.status(400).json({ message: input.error });
-  db.prepare("UPDATE newsletters SET subject = ?, body = ?, updated_at = datetime('now') WHERE id = ?").run(
+  await db.run(
+    "UPDATE newsletters SET subject = ?, body = ?, updated_at = datetime('now') WHERE id = ?",
     input.subject,
     input.text,
     id
   );
-  return res.json({ newsletter: toPublic(db.prepare('SELECT * FROM newsletters WHERE id = ?').get(id)) });
+  return res.json({ newsletter: toPublic(await db.get('SELECT * FROM newsletters WHERE id = ?', id)) });
 });
 
-router.delete('/:id', (req, res) => {
-  const result = db.prepare('DELETE FROM newsletters WHERE id = ?').run(Number(req.params.id));
+router.delete('/:id', async (req, res) => {
+  const result = await db.run('DELETE FROM newsletters WHERE id = ?', Number(req.params.id));
   if (result.changes === 0) return res.status(404).json({ message: 'Newsletter not found.' });
   return res.status(204).end();
 });
 
 router.post('/:id/send', async (req, res) => {
   const id = Number(req.params.id);
-  const newsletter = db.prepare('SELECT * FROM newsletters WHERE id = ?').get(id);
+  const newsletter = await db.get('SELECT * FROM newsletters WHERE id = ?', id);
   if (!newsletter) return res.status(404).json({ message: 'Newsletter not found.' });
   if (newsletter.status === 'sent') return res.status(409).json({ message: 'This newsletter was already sent.' });
   if (!isMailConfigured()) {
     return res.status(503).json({ message: 'Email sending is not set up on the server yet.' });
   }
 
-  const recipients = db.prepare("SELECT email, token FROM subscribers WHERE status = 'active'").all();
+  const recipients = await db.all("SELECT email, token FROM subscribers WHERE status = 'active'");
   if (recipients.length === 0) return res.status(400).json({ message: 'There are no active subscribers yet.' });
 
   const base = siteUrl(req);
@@ -126,11 +130,13 @@ router.post('/:id/send', async (req, res) => {
   }
 
   if (sent > 0) {
-    db.prepare(
-      "UPDATE newsletters SET status = 'sent', sent_count = ?, sent_at = datetime('now'), updated_at = datetime('now') WHERE id = ?"
-    ).run(sent, id);
+    await db.run(
+      "UPDATE newsletters SET status = 'sent', sent_count = ?, sent_at = datetime('now'), updated_at = datetime('now') WHERE id = ?",
+      sent,
+      id
+    );
   }
-  const row = db.prepare('SELECT * FROM newsletters WHERE id = ?').get(id);
+  const row = await db.get('SELECT * FROM newsletters WHERE id = ?', id);
   if (sent === 0) return res.status(502).json({ message: 'No emails could be sent. Check the SMTP settings.' });
   return res.json({ newsletter: toPublic(row), sent, failed: failed.length });
 });

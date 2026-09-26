@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db.js';
 import { requireAuth, requireAdmin } from '../auth.js';
-import { upload, deleteUploadedFile } from '../upload.js';
+import { upload, storeImage, deleteUploadedFile } from '../upload.js';
 
 const router = Router();
 
@@ -18,32 +18,35 @@ function toPublicMember(row) {
 
 // Reading the team roster is public — the About page and homepage render
 // whatever the admin has published, without requiring a login.
-router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM team_members ORDER BY id DESC').all();
+router.get('/', async (req, res) => {
+  const rows = await db.all('SELECT * FROM team_members ORDER BY id DESC');
   res.json({ members: rows.map(toPublicMember) });
 });
 
 // Everything below (create/update/delete) is limited to the Admin role.
 router.use(requireAuth, requireAdmin);
 
-router.post('/', upload.single('image'), (req, res) => {
+router.post('/', upload.single('image'), async (req, res) => {
   const { name, role } = req.body;
   if (!name || !name.trim()) {
     return res.status(400).json({ message: 'Name is required.' });
   }
-  const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+  const imagePath = await storeImage(req.file);
 
-  const result = db
-    .prepare('INSERT INTO team_members (name, role, image_path) VALUES (?, ?, ?)')
-    .run(name.trim(), (role || '').trim() || null, imagePath);
+  const id = await db.insert(
+    'INSERT INTO team_members (name, role, image_path) VALUES (?, ?, ?)',
+    name.trim(),
+    (role || '').trim() || null,
+    imagePath
+  );
 
-  const row = db.prepare('SELECT * FROM team_members WHERE id = ?').get(Number(result.lastInsertRowid));
+  const row = await db.get('SELECT * FROM team_members WHERE id = ?', id);
   return res.status(201).json({ member: toPublicMember(row) });
 });
 
-router.put('/:id', upload.single('image'), (req, res) => {
+router.put('/:id', upload.single('image'), async (req, res) => {
   const id = Number(req.params.id);
-  const existing = db.prepare('SELECT * FROM team_members WHERE id = ?').get(id);
+  const existing = await db.get('SELECT * FROM team_members WHERE id = ?', id);
   if (!existing) {
     return res.status(404).json({ message: 'Worker not found.' });
   }
@@ -55,29 +58,33 @@ router.put('/:id', upload.single('image'), (req, res) => {
 
   let imagePath = existing.image_path;
   if (req.file) {
-    deleteUploadedFile(existing.image_path);
-    imagePath = `/uploads/${req.file.filename}`;
+    imagePath = await storeImage(req.file);
+    await deleteUploadedFile(existing.image_path);
   } else if (removeImage === 'true') {
-    deleteUploadedFile(existing.image_path);
+    await deleteUploadedFile(existing.image_path);
     imagePath = null;
   }
 
-  db.prepare(
-    `UPDATE team_members SET name = ?, role = ?, image_path = ?, updated_at = datetime('now') WHERE id = ?`
-  ).run(name.trim(), (role || '').trim() || null, imagePath, id);
+  await db.run(
+    `UPDATE team_members SET name = ?, role = ?, image_path = ?, updated_at = datetime('now') WHERE id = ?`,
+    name.trim(),
+    (role || '').trim() || null,
+    imagePath,
+    id
+  );
 
-  const row = db.prepare('SELECT * FROM team_members WHERE id = ?').get(id);
+  const row = await db.get('SELECT * FROM team_members WHERE id = ?', id);
   return res.json({ member: toPublicMember(row) });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const existing = db.prepare('SELECT * FROM team_members WHERE id = ?').get(id);
+  const existing = await db.get('SELECT * FROM team_members WHERE id = ?', id);
   if (!existing) {
     return res.status(404).json({ message: 'Worker not found.' });
   }
-  db.prepare('DELETE FROM team_members WHERE id = ?').run(id);
-  deleteUploadedFile(existing.image_path);
+  await db.run('DELETE FROM team_members WHERE id = ?', id);
+  await deleteUploadedFile(existing.image_path);
   return res.status(204).end();
 });
 
