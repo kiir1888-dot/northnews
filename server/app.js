@@ -33,6 +33,7 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/', seoRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/news', newsRoutes);

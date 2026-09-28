@@ -33,7 +33,7 @@ function escapeXml(value) {
   })[character]);
 }
 
-router.get('/robots', (req, res) => {
+function robots(req, res) {
   const base = siteUrl(req);
   res.type('text/plain').send(`User-agent: *
 Allow: /
@@ -42,9 +42,9 @@ Disallow: /api/
 
 Sitemap: ${base}/sitemap.xml
 `);
-});
+}
 
-router.get('/sitemap', async (req, res) => {
+async function sitemap(req, res) {
   const base = siteUrl(req);
   const articles = await db.all('SELECT id, updated_at FROM news ORDER BY id DESC');
   const entries = [
@@ -71,6 +71,9 @@ router.get('/sitemap', async (req, res) => {
 ${urls}
 </urlset>
 `);
-});
+}
+
+router.get(['/robots', '/robots.txt'], robots);
+router.get(['/sitemap', '/sitemap.xml'], sitemap);
 
 export default router;
