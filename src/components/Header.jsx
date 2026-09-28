@@ -118,9 +118,11 @@ export default function Header() {
         <div className="mx-auto flex max-w-8xl items-center justify-between gap-4 px-4 py-3">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2" aria-label={`${brand.name} home`}>
-            <span className="flex h-10 items-center whitespace-nowrap rounded-lg bg-ink-950 px-2.5 font-serif text-sm font-black tracking-tight text-white dark:bg-white dark:text-ink-950">
-              NOR
-              <span className="text-[#e10600]">&nbsp;i</span>
+            <span
+              aria-hidden="true"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink-950 font-serif text-sm font-black tracking-tight text-white shadow-sm ring-1 ring-ink-950/10 transition-transform duration-200 hover:scale-105 dark:bg-white dark:text-ink-950 dark:ring-white/10"
+            >
+              N<span className="text-[#e10600]">i</span>
             </span>
             <span className="leading-none">
               <span className="font-serif text-2xl font-black tracking-tight">

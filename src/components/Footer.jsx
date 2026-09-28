@@ -23,10 +23,12 @@ export default function Footer() {
         <div className="grid gap-10 lg:grid-cols-12">
           {/* ------------------------ About Us ------------------------- */}
           <div className="lg:col-span-4">
-            <Link to="/" className="mb-4 inline-flex items-center gap-2">
-              <span className="flex h-10 items-center whitespace-nowrap rounded-lg bg-white px-2.5 font-serif text-sm font-black tracking-tight text-ink-950">
-                NOR
-                <span className="text-[#e10600]">&nbsp;i</span>
+            <Link to="/" className="group mb-4 inline-flex items-center gap-2" aria-label={`${brand.name} home`}>
+              <span
+                aria-hidden="true"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white font-serif text-sm font-black tracking-tight text-ink-950 shadow-sm ring-1 ring-white/20 transition-transform duration-200 group-hover:scale-105"
+              >
+                N<span className="text-[#e10600]">i</span>
               </span>
               <span className="font-serif text-2xl font-black text-white">
                 {brand.nameParts.primary}
