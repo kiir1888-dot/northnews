@@ -26,9 +26,9 @@ export default function Footer() {
             <Link to="/" className="group mb-4 inline-flex items-center gap-2" aria-label={`${brand.name} home`}>
               <span
                 aria-hidden="true"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white font-serif text-sm font-black tracking-tight text-ink-950 shadow-sm ring-1 ring-white/20 transition-transform duration-200 group-hover:scale-105"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white font-serif text-[10px] font-black tracking-tight text-ink-950 shadow-sm ring-1 ring-white/20 transition-transform duration-200 group-hover:scale-105"
               >
-                N<span className="text-[#e10600]">i</span>
+                NOR<span className="text-[#e10600]">&nbsp;i</span>
               </span>
               <span className="font-serif text-2xl font-black text-white">
                 {brand.nameParts.primary}
