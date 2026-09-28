@@ -130,7 +130,7 @@ export const websiteConfig = {
     legalLinks: [
       { label: 'Privacy Policy', to: '/privacy' },
       { label: 'Editorial Transparency', to: '/editorial-policy' },
-      { label: 'Terms of Use', to: '/privacy' },
+      { label: 'Terms of Use', to: '/terms' },
     ],
   },
 

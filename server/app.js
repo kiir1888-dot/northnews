@@ -15,6 +15,7 @@ import newslettersRoutes from './routes/newsletters.js';
 import commentsRoutes from './routes/comments.js';
 import submissionsRoutes from './routes/submissions.js';
 import settingsRoutes from './routes/settings.js';
+import seoRoutes from './routes/seo.js';
 
 /**
  * The API as an Express app. Used by `server/index.js` locally and by
@@ -45,6 +46,7 @@ app.use('/api/newsletters', newslettersRoutes);
 app.use('/api/comments', commentsRoutes);
 app.use('/api/submissions', submissionsRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/seo', seoRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

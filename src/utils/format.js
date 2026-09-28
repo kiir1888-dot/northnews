@@ -47,3 +47,10 @@ export function cx(...parts) {
 export function categorySlug(category) {
   return String(category || '').trim().toLowerCase();
 }
+
+/** Reader-facing category label from a route slug. */
+export function categoryLabel(category) {
+  const slug = categorySlug(category);
+  if (!slug || slug === 'all') return 'All Stories';
+  return slug.replace(/(^|[-\s])\S/g, (character) => character.toUpperCase());
+}

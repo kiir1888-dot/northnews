@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
+import Seo from './components/Seo';
 import BackToTopButton, { ScrollToTop } from './components/ScrollHelpers';
 import Home from './pages/Home';
 import Article from './pages/Article';
@@ -10,6 +11,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import EditorialPolicy from './pages/EditorialPolicy';
 import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 import Events from './pages/Events';
 import SubmitStory from './pages/SubmitStory';
 import Unsubscribe from './pages/Unsubscribe';
@@ -23,6 +25,7 @@ export default function App() {
   return (
     <div className="flex min-h-screen flex-col">
       <ScrollToTop />
+      <Seo />
 
       <a
         href="#main"
@@ -42,6 +45,7 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/editorial-policy" element={<EditorialPolicy />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/events" element={<Events />} />
           <Route path="/submit-story" element={<SubmitStory />} />
           <Route path="/unsubscribe" element={<Unsubscribe />} />

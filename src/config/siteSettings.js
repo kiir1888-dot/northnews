@@ -86,6 +86,7 @@ export function applySettings(base, s = {}) {
       values: values.length ? values : base.about.values,
     },
     pages: {
+      ...base.pages,
       privacy: mergePage(base.pages.privacy, s.pages?.privacy),
       editorial: mergePage(base.pages.editorial, s.pages?.editorial),
     },

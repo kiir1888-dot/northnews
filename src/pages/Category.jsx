@@ -4,7 +4,7 @@ import ArticleCard from '../components/ArticleCard';
 import TrendingSidebar from '../components/TrendingSidebar';
 import SectionHeading from '../components/SectionHeading';
 import { useSite } from '../context/SiteContext';
-import { categorySlug } from '../utils/format';
+import { categoryLabel, categorySlug } from '../utils/format';
 
 /**
  * Category — a per-category news archive (e.g. /category/politics).
@@ -25,7 +25,7 @@ export default function Category() {
     ? newsItems.filter((item) => item.category === matchedCategory)
     : newsItems;
 
-  const title = matchedCategory || 'All Stories';
+  const title = matchedCategory || categoryLabel(categoryId);
 
   return (
     <>
@@ -33,6 +33,7 @@ export default function Category() {
 
       <div className="mx-auto max-w-8xl px-4 py-8">
         <SectionHeading
+          as="h1"
           kicker="Section archive"
           title={title}
           description={`${filtered.length} ${

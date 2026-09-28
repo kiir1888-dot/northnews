@@ -151,6 +151,7 @@ export default function Events() {
 
       <div className="mx-auto max-w-8xl px-4 py-8">
         <SectionHeading
+          as="h1"
           kicker="Join us"
           title="Events"
           description="Community forums, briefings and gatherings hosted by the newsroom."

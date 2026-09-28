@@ -22,7 +22,8 @@ export default function Hero() {
     return (
       <section aria-label="Top stories" className="mx-auto max-w-8xl px-4 py-8">
         <div className="surface rounded-2xl p-10 text-center text-sm text-ink-500 dark:text-ink-400">
-          No stories published yet. Check back shortly.
+          <h1 className="text-xl font-bold text-ink-900 dark:text-white">Independent news from NORTH i</h1>
+          <p className="mt-2">No stories published yet. Check back shortly.</p>
         </div>
       </section>
     );
