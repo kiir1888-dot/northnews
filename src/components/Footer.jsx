@@ -28,7 +28,7 @@ export default function Footer() {
                 aria-hidden="true"
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white font-serif text-[10px] font-black tracking-tight text-ink-950 shadow-sm ring-1 ring-white/20 transition-transform duration-200 group-hover:scale-105"
               >
-                NOR<span className="text-[#e10600]">&nbsp;i</span>
+                NOR
               </span>
               <span className="font-serif text-2xl font-black text-white">
                 {brand.nameParts.primary}

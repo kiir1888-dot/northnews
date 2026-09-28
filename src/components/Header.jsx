@@ -122,7 +122,7 @@ export default function Header() {
               aria-hidden="true"
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink-950 font-serif text-[10px] font-black tracking-tight text-white shadow-sm ring-1 ring-ink-950/10 transition-transform duration-200 hover:scale-105 dark:bg-white dark:text-ink-950 dark:ring-white/10"
             >
-              NOR<span className="text-[#e10600]">&nbsp;i</span>
+              NOR
             </span>
             <span className="leading-none">
               <span className="font-serif text-2xl font-black tracking-tight">
