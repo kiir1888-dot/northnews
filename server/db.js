@@ -7,7 +7,22 @@ import postgres from 'postgres';
  * Postgres `$1, $2...` parameters and maps `datetime('now')` to a UTC text
  * timestamp, so every row keeps the "YYYY-MM-DD HH:MM:SS" format.
  */
-const connectionString = process.env.DATABASE_URL;
+let connectionString = process.env.DATABASE_URL;
+
+// On Vercel, Supabase's session pooler (port 5432) runs out of its 15 slots
+// because every serverless instance keeps a connection open. The transaction
+// pooler (port 6543) on the same host shares connections, so use it instead.
+if (process.env.VERCEL && connectionString) {
+  try {
+    const url = new URL(connectionString);
+    if (url.hostname.endsWith('pooler.supabase.com') && url.port === '5432') {
+      url.port = '6543';
+      connectionString = url.toString();
+    }
+  } catch {
+    // Leave an unparsable URL as it is; postgres() will report the problem.
+  }
+}
 
 export const NOW_SQL = "to_char(now() AT TIME ZONE 'utc', 'YYYY-MM-DD HH24:MI:SS')";
 
