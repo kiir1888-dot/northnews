@@ -74,6 +74,8 @@ export default {
           500: '#e0245e',
           600: '#c11a4d',
         },
+        // True brand red for the logo "i" and the Breaking label.
+        signal: '#e10600',
         danger: {
           50: '#fef2f2',
           100: '#fee2e2',

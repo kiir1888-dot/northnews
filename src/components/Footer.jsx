@@ -32,7 +32,7 @@ export default function Footer() {
               </span>
               <span className="font-serif text-2xl font-black text-white">
                 {brand.nameParts.primary}
-                <span className="text-accent-500"> {brand.nameParts.accent}</span>
+                <span className="text-signal"> {brand.nameParts.accent}</span>
               </span>
             </Link>
 

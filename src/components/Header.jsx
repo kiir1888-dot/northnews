@@ -127,7 +127,7 @@ export default function Header() {
             <span className="leading-none">
               <span className="font-serif text-2xl font-black tracking-tight">
                 {brand.nameParts.primary}
-                <span className="text-accent-500"> {brand.nameParts.accent}</span>
+                <span className="text-signal"> {brand.nameParts.accent}</span>
               </span>
               <span className="mt-0.5 hidden font-display text-[11px] lowercase tracking-[0.12em] text-ink-500 dark:text-ink-400 sm:block">
                 {brand.tagline}
@@ -240,7 +240,7 @@ export default function Header() {
 
       {/* -------------------------- breaking ticker ---------------------- */}
       <div className="flex items-stretch overflow-hidden border-b border-ink-200 bg-white dark:border-ink-800 dark:bg-ink-950">
-        <span className="z-10 flex shrink-0 items-center gap-2 bg-accent-500 px-3 py-2 font-display text-xs font-bold uppercase tracking-[0.16em] text-white sm:px-4">
+        <span className="z-10 flex shrink-0 items-center gap-2 bg-signal px-3 py-2 font-display text-xs font-bold uppercase tracking-[0.16em] text-white sm:px-4">
           <span className="h-2 w-2 animate-pulse rounded-full bg-white" aria-hidden="true" />
           Breaking
         </span>
