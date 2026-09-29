@@ -16,6 +16,7 @@ import commentsRoutes from './routes/comments.js';
 import submissionsRoutes from './routes/submissions.js';
 import settingsRoutes from './routes/settings.js';
 import seoRoutes from './routes/seo.js';
+import { isMailConfigured } from './mailer.js';
 
 /**
  * The API as an Express app. Used by `server/index.js` locally and by
@@ -49,7 +50,18 @@ app.use('/api/submissions', submissionsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/seo', seoRoutes);
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+// Reports only whether each email setting is present (never the values).
+app.get('/api/health', (req, res) =>
+  res.json({
+    status: 'ok',
+    email: {
+      ready: isMailConfigured(),
+      ...Object.fromEntries(
+        ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'MAIL_FROM', 'NOTIFY_EMAIL'].map((k) => [k, Boolean(process.env[k])])
+      ),
+    },
+  })
+);
 
 app.use('/api', (req, res) => res.status(404).json({ message: 'Not found.' }));
 
