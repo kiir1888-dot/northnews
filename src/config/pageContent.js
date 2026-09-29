@@ -5,12 +5,12 @@
 export const defaultPages = {
   "privacy": {
     "updated": "1 September 2026",
-    "intro": "This notice explains what personal data NORTH i collects, why we collect it, how long we keep it, and the rights you have over it.",
+    "intro": "This notice explains what personal data North i collects, why we collect it, how long we keep it, and the rights you have over it.",
     "sections": [
       {
         "heading": "1. Data we collect",
         "paragraphs": [
-          "Account and newsletter data: the email address you provide, and your subscription preferences. We do not require a real name to read NORTH i.",
+          "Account and newsletter data: the email address you provide, and your subscription preferences. We do not require a real name to read North i.",
           "Usage data: pages viewed, referring site, approximate location derived from IP address, device type and browser. This is aggregated for audience reporting and is not used to build advertising profiles.",
           "Correspondence: messages you send through our contact form or by email, retained so we can respond and maintain a record of complaints and corrections."
         ]
@@ -53,12 +53,12 @@ export const defaultPages = {
   },
   "editorial": {
     "updated": "1 September 2026",
-    "intro": "This statement explains who owns NORTH i, how we fund our journalism, how we make editorial decisions, and what you can expect when we get something wrong.",
+    "intro": "This statement explains who owns North i, how we fund our journalism, how we make editorial decisions, and what you can expect when we get something wrong.",
     "sections": [
       {
         "heading": "1. Ownership and funding",
         "paragraphs": [
-          "NORTH i is published by NORTH i Media Group Ltd., a privately held company. Our founder retains a controlling interest; no political party, government body or state-owned entity holds any stake, directly or indirectly.",
+          "North i is published by North i Media Group Ltd., a privately held company. Our founder retains a controlling interest; no political party, government body or state-owned entity holds any stake, directly or indirectly.",
           "Revenue comes from reader subscriptions, display advertising, licensed syndication and philanthropic grants for specific investigative projects. Where a grant funds a body of work, that funder is named on every story produced under it."
         ]
       },

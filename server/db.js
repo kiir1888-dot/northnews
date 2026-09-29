@@ -35,7 +35,7 @@ function translate(text) {
 }
 
 /**
- * NORTH i keeps its tables in their own Postgres schema so they never clash
+ * North i keeps its tables in their own Postgres schema so they never clash
  * with other tables (e.g. an older app's `news` or `events`) in the same
  * Supabase project. The pooler hands out a fresh connection per transaction,
  * so the search_path is set with SET LOCAL inside each transaction.

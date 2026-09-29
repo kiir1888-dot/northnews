@@ -32,7 +32,7 @@ export default function Sidebar() {
   return (
     <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-brand-100 bg-white">
       <div className="border-b border-brand-100 bg-gradient-to-br from-brand-600 to-brand-700 px-6 py-5">
-        <p className="font-sans text-lg font-semibold text-white">NORTH i</p>
+        <p className="font-sans text-lg font-semibold text-white">North i</p>
         <p className="text-xs font-medium uppercase tracking-wider text-brand-100">Editorial admin</p>
       </div>
 

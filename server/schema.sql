@@ -1,4 +1,4 @@
--- NORTH i database schema (Supabase Postgres).
+-- North i database schema (Supabase Postgres).
 -- Applied by `npm run db:setup`. Safe to run more than once.
 -- All tables live in the "northi" schema (the setup script sets search_path),
 -- so they never collide with other tables in the same Supabase project.
@@ -148,5 +148,5 @@ ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
 -- The CEO spotlight always reads/updates this single row.
 INSERT INTO ceo_profile (id, name, title, message)
 VALUES (1, 'Alex Morgan', 'CEO & Founder',
-  'Welcome to NORTH i. We started this newsroom to bring honest, independent reporting to our community. Thank you for reading and supporting our mission.')
+  'Welcome to North i. We started this newsroom to bring honest, independent reporting to our community. Thank you for reading and supporting our mission.')
 ON CONFLICT (id) DO NOTHING;

@@ -1,5 +1,5 @@
 /**
- * One-time (safe to repeat) setup of the Supabase project for NORTH i:
+ * One-time (safe to repeat) setup of the Supabase project for North i:
  * creates the database tables and the image storage buckets.
  *
  *   npm run db:setup

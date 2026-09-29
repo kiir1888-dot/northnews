@@ -1,6 +1,6 @@
 /**
  * =============================================================================
- *  NORTH i — SITE CONFIGURATION
+ *  North i — SITE CONFIGURATION
  * =============================================================================
  *  This is the single source of truth for everything "corporate" about the
  *  publication: branding, contact details, navigation and social profiles.
@@ -18,14 +18,14 @@ export const websiteConfig = {
   /* BRAND                                                                   */
   /* ---------------------------------------------------------------------- */
   brand: {
-    name: 'NORTH i',
+    name: 'North i',
     // The name is rendered as two parts so the accent mark can be styled.
-    nameParts: { primary: 'NORTH', accent: 'i' },
+    nameParts: { primary: 'North', accent: 'i' },
     tagline: 'journalism without a compass bias',
     description:
-      'NORTH i is an independent digital newsroom covering politics, technology, business, sport, education and culture. We publish verified reporting, long-form analysis and data journalism for readers who want the full picture, not the loudest headline.',
+      'North i is an independent digital newsroom covering politics, technology, business, sport, education and culture. We publish verified reporting, long-form analysis and data journalism for readers who want the full picture, not the loudest headline.',
     foundedYear: 2026,
-    legalEntity: 'NORTH i Media Group Ltd.',
+    legalEntity: 'North i Media Group Ltd.',
     locale: 'en-GB',
     timeZone: 'Africa/Juba',
   },
@@ -139,7 +139,7 @@ export const websiteConfig = {
   /* ---------------------------------------------------------------------- */
   about: {
     story:
-      'Founded in 2026 and operating as NORTH i Media Group Ltd., we publish from newsrooms across the region with a permanent desk in Atlabara, Juba, South Sudan. Our readers fund a growing share of our reporting, which is why our editorial priorities answer to them first.',
+      'Founded in 2026 and operating as North i Media Group Ltd., we publish from newsrooms across the region with a permanent desk in Atlabara, Juba, South Sudan. Our readers fund a growing share of our reporting, which is why our editorial priorities answer to them first.',
     values: [
       {
         title: 'Verification before velocity',
@@ -169,7 +169,7 @@ export const websiteConfig = {
   cookieNotice: {
     storageKey: 'northi-cookie-consent',
     heading: 'We use cookies',
-    body: 'We use essential cookies to run NORTH i and optional analytics cookies to understand which stories resonate. You can change your mind at any time.',
+    body: 'We use essential cookies to run North i and optional analytics cookies to understand which stories resonate. You can change your mind at any time.',
     acceptLabel: 'Accept all',
     rejectLabel: 'Essential only',
     policyLabel: 'Read our privacy policy',

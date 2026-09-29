@@ -106,7 +106,7 @@ export default function SupportPage() {
                     <p className="whitespace-pre-wrap text-sm leading-6 text-ink-800">{m.message}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <a
-                        href={`mailto:${m.email}?subject=${encodeURIComponent(`Re: ${m.subject || 'Your message to NORTH i'}`)}`}
+                        href={`mailto:${m.email}?subject=${encodeURIComponent(`Re: ${m.subject || 'Your message to North i'}`)}`}
                         className={secondaryButton}
                       >
                         Reply by email

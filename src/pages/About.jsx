@@ -33,7 +33,7 @@ export default function About() {
             <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-ink-100 dark:bg-ink-800">
               <img
                 src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80"
-                alt="The NORTH i newsroom"
+                alt="The North i newsroom"
                 loading="lazy"
                 className="h-full w-full object-cover"
               />

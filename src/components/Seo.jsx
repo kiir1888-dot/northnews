@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useSite } from '../context/SiteContext';
 import { categoryLabel, categorySlug } from '../utils/format';
 
-const DEFAULT_TITLE = 'NORTH i | Independent News & Magazine';
+const DEFAULT_TITLE = 'North i | Independent News & Magazine';
 
 const STATIC_ROUTES = {
   '/': {
@@ -12,32 +12,32 @@ const STATIC_ROUTES = {
       'Independent journalism, sharp analysis and trusted reporting on politics, technology, business, sport, education and culture.',
   },
   '/about': {
-    title: 'About NORTH i | Independent Journalism',
-    description: 'Learn about NORTH i, our newsroom, values, leadership and commitment to independent journalism.',
+    title: 'About North i | Independent Journalism',
+    description: 'Learn about North i, our newsroom, values, leadership and commitment to independent journalism.',
   },
   '/events': {
-    title: 'Events | NORTH i',
-    description: 'Community forums, briefings and gatherings hosted by the NORTH i newsroom.',
+    title: 'Events | North i',
+    description: 'Community forums, briefings and gatherings hosted by the North i newsroom.',
   },
   '/contact': {
-    title: 'Contact NORTH i',
-    description: 'Contact the NORTH i newsroom with news tips, corrections, partnership enquiries or feedback.',
+    title: 'Contact North i',
+    description: 'Contact the North i newsroom with news tips, corrections, partnership enquiries or feedback.',
   },
   '/submit-story': {
-    title: 'Submit a Story | NORTH i',
-    description: 'Send a news tip, eyewitness account, article or supporting photo to the NORTH i newsroom.',
+    title: 'Submit a Story | North i',
+    description: 'Send a news tip, eyewitness account, article or supporting photo to the North i newsroom.',
   },
   '/editorial-policy': {
-    title: 'Editorial Transparency Policy | NORTH i',
-    description: 'How NORTH i verifies reporting, protects editorial independence, corrects errors and handles conflicts.',
+    title: 'Editorial Transparency Policy | North i',
+    description: 'How North i verifies reporting, protects editorial independence, corrects errors and handles conflicts.',
   },
   '/privacy': {
-    title: 'Privacy & Cookies Policy | NORTH i',
-    description: 'How NORTH i collects, uses, protects and retains reader information.',
+    title: 'Privacy & Cookies Policy | North i',
+    description: 'How North i collects, uses, protects and retains reader information.',
   },
   '/terms': {
-    title: 'Terms of Use | NORTH i',
-    description: 'The terms that apply when accessing and using the NORTH i website and services.',
+    title: 'Terms of Use | North i',
+    description: 'The terms that apply when accessing and using the North i website and services.',
   },
 };
 
@@ -83,12 +83,12 @@ export default function Seo() {
     if (articleMatch) {
       const article = newsItems.find((item) => String(item.id) === articleMatch[1]);
       if (article) {
-        title = `${article.title} | NORTH i`;
+        title = `${article.title} | North i`;
         description = article.description || config.brand.description;
         image = article.imagePath;
         type = 'article';
       } else {
-        title = 'Story Not Found | NORTH i';
+        title = 'Story Not Found | North i';
         description = 'The requested story could not be found.';
         noIndex = true;
       }
@@ -96,10 +96,10 @@ export default function Seo() {
       const requested = categorySlug(location.pathname.slice('/category/'.length));
       const category = newsItems.find((item) => categorySlug(item.category) === requested)?.category;
       const label = category || categoryLabel(requested);
-      title = `${label} | NORTH i`;
-      description = `Latest ${label.toLowerCase()} reporting, analysis and updates from NORTH i.`;
+      title = `${label} | North i`;
+      description = `Latest ${label.toLowerCase()} reporting, analysis and updates from North i.`;
     } else if (!title) {
-      title = 'Page Not Found | NORTH i';
+      title = 'Page Not Found | North i';
       description = 'The requested page could not be found.';
       noIndex = true;
     }

@@ -13,7 +13,7 @@ if (!isMailConfigured() || !process.env.NOTIFY_EMAIL) {
 try {
   await sendMail({
     to: process.env.NOTIFY_EMAIL,
-    subject: '[NORTH i] Test email',
+    subject: '[North i] Test email',
     text: 'Success! Your website can now send email. Contact messages and story submissions will arrive here.',
   });
   console.log(`Test email sent to ${process.env.NOTIFY_EMAIL}. Check the inbox (and Spam).`);

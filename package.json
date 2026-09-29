@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "NORTH i — a modern, data-driven news & magazine web application.",
+  "description": "North i — a modern, data-driven news & magazine web application.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

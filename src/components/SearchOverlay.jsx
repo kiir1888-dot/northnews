@@ -48,7 +48,7 @@ export default function SearchOverlay() {
         <div className="max-h-[55vh] overflow-y-auto rail-scroll">
           {searchQuery.trim() === '' ? (
             <p className="px-5 py-8 text-center text-sm text-ink-500 dark:text-ink-400">
-              Start typing to search the NORTH i archive.
+              Start typing to search the North i archive.
             </p>
           ) : searchResults.length === 0 ? (
             <p className="px-5 py-8 text-center text-sm text-ink-500 dark:text-ink-400">

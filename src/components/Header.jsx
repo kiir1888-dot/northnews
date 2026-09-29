@@ -43,7 +43,7 @@ function LocalClock({ locale, timeZone }) {
 
 /**
  * Header — utility bar (date/time, socials, theme, search),
- * masthead with the NORTH i logo and primary navigation,
+ * masthead with the North i logo and primary navigation,
  * and the dynamic breaking-news ticker.
  */
 export default function Header() {

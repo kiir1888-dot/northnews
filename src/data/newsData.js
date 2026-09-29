@@ -1,6 +1,6 @@
 /**
  * =============================================================================
- *  NORTH i — NEWS DATA LAYER (newsData.js)
+ *  North i — NEWS DATA LAYER (newsData.js)
  * =============================================================================
  *  Every news item shown on the public site comes from the real backend
  *  (`/api/news`), which is populated entirely through the admin dashboard.

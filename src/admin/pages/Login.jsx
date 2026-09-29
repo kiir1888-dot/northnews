@@ -68,7 +68,7 @@ export default function Login() {
             <LockIcon className="h-5 w-5" />
           </div>
           <h1 className="font-sans text-xl font-medium text-ink-900">Admin sign in</h1>
-          <p className="mt-1 text-sm text-ink-500">Sign in to manage the NORTH i newsroom.</p>
+          <p className="mt-1 text-sm text-ink-500">Sign in to manage the North i newsroom.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>

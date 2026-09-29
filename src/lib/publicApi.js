@@ -46,8 +46,8 @@ export async function emailNewsroom({ subject, name, email, fields }) {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({
         access_key: WEB3FORMS_KEY,
-        subject: `[NORTH i] ${subject}`,
-        from_name: 'NORTH i website',
+        subject: `[North i] ${subject}`,
+        from_name: 'North i website',
         name,
         email,
         replyto: email,

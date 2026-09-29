@@ -43,7 +43,7 @@ export async function notifyNewsroom(subject, text, replyTo) {
     return false;
   }
   try {
-    await sendMail({ to, subject: `[NORTH i] ${subject}`, text, replyTo });
+    await sendMail({ to, subject: `[North i] ${subject}`, text, replyTo });
     return true;
   } catch (err) {
     // eslint-disable-next-line no-console

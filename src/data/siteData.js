@@ -1,6 +1,6 @@
 /**
  * =============================================================================
- *  NORTH i — TEAM & CEO DATA LAYER (siteData.js)
+ *  North i — TEAM & CEO DATA LAYER (siteData.js)
  * =============================================================================
  *  The editorial team roster and the CEO/Founder spotlight are both managed
  *  entirely from the admin dashboard. These fetchers hit the same public

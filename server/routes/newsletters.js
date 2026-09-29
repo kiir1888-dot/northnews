@@ -32,7 +32,7 @@ function toHtml(body, unsubscribeUrl) {
     .map((p) => `<p style="margin:0 0 16px;line-height:1.6">${p.replace(/\n/g, '<br>')}</p>`)
     .join('');
   return `<div style="font-family:Arial,sans-serif;font-size:15px;color:#111;max-width:600px;margin:0 auto">
-<p style="font-size:22px;font-weight:900;margin:0 0 20px">NORTH <span style="color:#e10600">i</span></p>
+<p style="font-size:22px;font-weight:900;margin:0 0 20px">North <span style="color:#e10600">i</span></p>
 ${paragraphs}
 <hr style="border:none;border-top:1px solid #ddd;margin:24px 0">
 <p style="font-size:12px;color:#666">You are receiving this because you subscribed on our website.
