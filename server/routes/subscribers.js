@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { db } from '../db.js';
 import { requireAuth, requireAdmin } from '../auth.js';
 import { clean, isBot, isEmail, rateLimit } from '../publicForm.js';
+import { notifyNewsroom } from '../mailer.js';
 
 const router = Router();
 
@@ -25,10 +26,10 @@ router.post('/', rateLimit({ max: 8 }), async (req, res) => {
 
   const existing = await db.get('SELECT * FROM subscribers WHERE lower(email) = lower(?)', email);
   if (existing) {
-    if (existing.status !== 'active') {
-      await db.run("UPDATE subscribers SET status = 'active', unsubscribed_at = NULL WHERE id = ?", existing.id);
-    }
-    return res.status(200).json({ ok: true });
+    if (existing.status === 'active') return res.status(200).json({ ok: true, notify: false });
+    await db.run("UPDATE subscribers SET status = 'active', unsubscribed_at = NULL WHERE id = ?", existing.id);
+    const emailed = await notifyNewsroom('Newsletter subscriber rejoined', `${email} subscribed to the newsletter again.`, email);
+    return res.status(200).json({ ok: true, emailed });
   }
 
   await db.run(
@@ -36,7 +37,8 @@ router.post('/', rateLimit({ max: 8 }), async (req, res) => {
     email,
     crypto.randomBytes(24).toString('hex')
   );
-  return res.status(201).json({ ok: true });
+  const emailed = await notifyNewsroom('New newsletter subscriber', `${email} just subscribed to the newsletter.`, email);
+  return res.status(201).json({ ok: true, emailed });
 });
 
 // Public: one-click unsubscribe link from newsletter emails.

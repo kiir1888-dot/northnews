@@ -41,8 +41,12 @@ router.post('/', rateLimit({ max: 5 }), async (req, res) => {
     message
   );
 
-  await notifyNewsroom(`New message: ${subject || 'Contact form'}`, `From: ${name} <${email}>\n\n${message}`, email);
-  return res.status(201).json({ ok: true });
+  const emailed = await notifyNewsroom(
+    `New message: ${subject || 'Contact form'}`,
+    `From: ${name} <${email}>\n\n${message}`,
+    email
+  );
+  return res.status(201).json({ ok: true, emailed });
 });
 
 // Dashboard (Admins and Editors): the Support inbox.

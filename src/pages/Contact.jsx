@@ -46,9 +46,9 @@ export default function Contact() {
     }
     setSending(true);
     try {
-      await postJson('/contact', { ...form, website: trap });
-      if (!trap) {
-        emailNewsroom({
+      const saved = await postJson('/contact', { ...form, website: trap });
+      if (!trap && !saved?.emailed) {
+        await emailNewsroom({
           subject: `New message: ${form.subject}`,
           name: form.name,
           email: form.email,

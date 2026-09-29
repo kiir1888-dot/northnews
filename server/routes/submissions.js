@@ -53,8 +53,12 @@ router.post('/', rateLimit({ max: 4 }), upload.single('image'), async (req, res)
     imagePath
   );
 
-  await notifyNewsroom(`New story submission: ${headline}`, `From: ${name} <${email}> ${phone}\n\n${story}`, email);
-  return res.status(201).json({ ok: true });
+  const emailed = await notifyNewsroom(
+    `New story submission: ${headline}`,
+    `From: ${name} <${email}> ${phone}\n\n${story}`,
+    email
+  );
+  return res.status(201).json({ ok: true, emailed });
 });
 
 // Dashboard (Admins and Editors): editorial review.

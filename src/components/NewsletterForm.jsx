@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cx } from '../utils/format';
-import { postJson } from '../lib/publicApi';
+import { emailNewsroom, postJson } from '../lib/publicApi';
 import { CheckIcon } from './Icons';
 import Honeypot from './Honeypot';
 
@@ -22,7 +22,16 @@ export default function NewsletterForm({ variant = 'light', className }) {
     }
     setStatus('sending');
     try {
-      await postJson('/subscribers', { email: email.trim(), website: trap });
+      const subscriber = email.trim();
+      const saved = await postJson('/subscribers', { email: subscriber, website: trap });
+      if (!trap && saved?.notify !== false && !saved?.emailed) {
+        await emailNewsroom({
+          subject: 'New newsletter subscriber',
+          name: subscriber,
+          email: subscriber,
+          fields: { message: `${subscriber} just subscribed to the newsletter.` },
+        });
+      }
       setStatus('success');
       setEmail('');
     } catch (err) {

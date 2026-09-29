@@ -30,14 +30,24 @@ export async function sendMail({ to, subject, text, html, replyTo }) {
   return transporter.sendMail({ from: mailFrom, to, subject, text, html, replyTo });
 }
 
-/** Emails the newsroom (NOTIFY_EMAIL) about new activity. Never throws. */
+/**
+ * Emails the newsroom (NOTIFY_EMAIL) about new activity. Never throws.
+ * Resolves to true when the email was sent, so the browser knows whether it
+ * still needs to send its Web3Forms backup copy.
+ */
 export async function notifyNewsroom(subject, text, replyTo) {
-  const to = process.env.NOTIFY_EMAIL;
-  if (!to || !isMailConfigured()) return;
+  const to = process.env.NOTIFY_EMAIL || mailFrom;
+  if (!to || !isMailConfigured()) {
+    // eslint-disable-next-line no-console
+    console.warn('[northi] newsroom email skipped: SMTP is not fully configured (check SMTP_HOST, SMTP_USER, SMTP_PASS).');
+    return false;
+  }
   try {
     await sendMail({ to, subject: `[NORTH i] ${subject}`, text, replyTo });
+    return true;
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[northi] notification email failed:', err.message);
+    return false;
   }
 }

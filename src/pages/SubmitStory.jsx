@@ -42,9 +42,9 @@ export default function SubmitStory() {
 
     setSending(true);
     try {
-      await postForm('/submissions', data);
-      if (!trap) {
-        emailNewsroom({
+      const saved = await postForm('/submissions', data);
+      if (!trap && !saved?.emailed) {
+        await emailNewsroom({
           subject: `New story submission: ${form.headline}`,
           name: form.name,
           email: form.email,

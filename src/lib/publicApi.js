@@ -32,10 +32,14 @@ const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY;
 /**
  * Emails a copy of a form to the newsroom inbox through Web3Forms.
  * Runs after the message is already saved in the dashboard, so a failure
- * here is logged but never shown to the reader.
+ * here is logged but never shown to the reader. Resolves to true on success.
  */
 export async function emailNewsroom({ subject, name, email, fields }) {
-  if (!WEB3FORMS_KEY) return;
+  if (!WEB3FORMS_KEY) {
+    // eslint-disable-next-line no-console
+    console.warn('[northi] VITE_WEB3FORMS_KEY is missing from this build; newsroom email not sent.');
+    return false;
+  }
   try {
     const res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
@@ -52,8 +56,10 @@ export async function emailNewsroom({ subject, name, email, fields }) {
     });
     const data = await res.json().catch(() => null);
     if (!res.ok || data?.success === false) throw new Error(data?.message || `HTTP ${res.status}`);
+    return true;
   } catch (err) {
     // eslint-disable-next-line no-console
     console.warn('[northi] Web3Forms email failed:', err.message);
+    return false;
   }
 }
