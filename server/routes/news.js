@@ -29,9 +29,72 @@ function toPublicNews(row) {
 
 // Reading news is public — the site's homepage and article pages render
 // whatever the admin has published, without requiring a login.
+//
+// With `?limit=` the public site gets one page of stories with a short
+// excerpt instead of the full text, so page loads stay small as the archive
+// grows. Optional filters: `offset`, `category`, `q` (search). Without
+// `limit` the full list is returned (used by the admin dashboard).
+const MAX_PAGE_SIZE = 50;
+const EXCERPT_LENGTH = 320;
+
+function toInt(value, fallback) {
+  const n = Number.parseInt(value, 10);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 router.get('/', async (req, res) => {
-  const rows = await db.all('SELECT * FROM news ORDER BY date DESC NULLS LAST, id DESC');
-  res.json({ news: rows.map(toPublicNews), categories: NEWS_CATEGORIES });
+  if (req.query.limit === undefined) {
+    const rows = await db.all('SELECT * FROM news ORDER BY date DESC NULLS LAST, id DESC');
+    return res.json({ news: rows.map(toPublicNews), categories: NEWS_CATEGORIES });
+  }
+
+  const limit = Math.min(Math.max(toInt(req.query.limit, 20), 1), MAX_PAGE_SIZE);
+  const offset = Math.max(toInt(req.query.offset, 0), 0);
+  const where = [];
+  const params = [];
+
+  const category = NEWS_CATEGORIES.find((c) => c.toLowerCase() === String(req.query.category || '').toLowerCase());
+  if (category) {
+    where.push("COALESCE(category, 'General') = ?");
+    params.push(category);
+  }
+
+  const q = String(req.query.q || '').trim().slice(0, 100);
+  if (q) {
+    where.push("(title || ' ' || COALESCE(description, '')) ILIKE ?");
+    params.push(`%${q.replace(/[\\%_]/g, '\\$&')}%`);
+  }
+
+  // Fetch one extra row to know whether another page exists.
+  const rows = await db.all(
+    `SELECT id, title, date, category, image_path, created_at, updated_at,
+            LEFT(description, ${EXCERPT_LENGTH}) AS description,
+            LENGTH(description) > ${EXCERPT_LENGTH} AS truncated
+       FROM news
+      ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
+      ORDER BY date DESC NULLS LAST, id DESC
+      LIMIT ? OFFSET ?`,
+    ...params,
+    limit + 1,
+    offset
+  );
+
+  const hasMore = rows.length > limit;
+  const news = rows.slice(0, limit).map((row) => {
+    const item = toPublicNews(row);
+    if (row.truncated && item.description) item.description = `${item.description.trimEnd()}…`;
+    return item;
+  });
+  return res.json({ news, categories: NEWS_CATEGORIES, hasMore });
+});
+
+// A single story with its full text, for the article page.
+router.get('/:id', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(404).json({ message: 'Story not found.' });
+  const row = await db.get('SELECT * FROM news WHERE id = ?', id);
+  if (!row) return res.status(404).json({ message: 'Story not found.' });
+  return res.json({ news: toPublicNews(row) });
 });
 
 // Everything below (create/update/delete) needs a dashboard login (Admin or Editor).

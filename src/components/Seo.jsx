@@ -66,10 +66,12 @@ function removeMeta(selector) {
 
 export default function Seo() {
   const location = useLocation();
-  const { config, newsItems, newsLoading } = useSite();
+  const { config, newsItems, articleCache } = useSite();
 
   useEffect(() => {
-    if (newsLoading && location.pathname.startsWith('/article/')) return;
+    const articleMatch = location.pathname.match(/^\/article\/([^/]+)$/);
+    // Wait until the article page has loaded the story.
+    if (articleMatch && articleCache[articleMatch[1]] === undefined) return;
 
     const origin = window.location.origin;
     const canonicalUrl = `${origin}${location.pathname === '/' ? '/' : location.pathname}`;
@@ -79,9 +81,8 @@ export default function Seo() {
     let type = 'website';
     let noIndex = false;
 
-    const articleMatch = location.pathname.match(/^\/article\/([^/]+)$/);
     if (articleMatch) {
-      const article = newsItems.find((item) => String(item.id) === articleMatch[1]);
+      const article = articleCache[articleMatch[1]];
       if (article) {
         title = `${article.title} | North i`;
         description = article.description || config.brand.description;
@@ -131,7 +132,7 @@ export default function Seo() {
       removeMeta('meta[property="og:image"]');
       removeMeta('meta[name="twitter:image"]');
     }
-  }, [config.brand.description, config.brand.name, location.pathname, newsItems, newsLoading]);
+  }, [articleCache, config.brand.description, config.brand.name, location.pathname, newsItems]);
 
   return null;
 }

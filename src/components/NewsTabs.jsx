@@ -12,7 +12,7 @@ const PAGE_SIZE = 6;
  * every published news item, newest first, next to the trending sidebar.
  */
 export default function NewsTabs() {
-  const { newsItems, newsLoading } = useSite();
+  const { newsItems, newsLoading, hasMoreNews, loadingMoreNews, loadMoreNews } = useSite();
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [activeCategory, setActiveCategory] = useState('All');
 
@@ -86,14 +86,19 @@ export default function NewsTabs() {
                 ))}
               </div>
 
-              {visible < filtered.length && (
+              {(visible < filtered.length || hasMoreNews) && (
                 <div className="mt-8 text-center">
                   <button
                     type="button"
-                    onClick={() => setVisible((v) => v + PAGE_SIZE)}
-                    className="rounded-lg border-2 border-ink-950 px-6 py-2.5 font-display text-sm font-medium uppercase tracking-wide transition hover:bg-ink-950 hover:text-white dark:border-white dark:hover:bg-white dark:hover:text-ink-950"
+                    disabled={loadingMoreNews}
+                    onClick={() => {
+                      // Fetch the next page from the server once the loaded stories run out.
+                      if (visible + PAGE_SIZE > filtered.length && hasMoreNews) loadMoreNews();
+                      setVisible((v) => v + PAGE_SIZE);
+                    }}
+                    className="rounded-lg border-2 border-ink-950 px-6 py-2.5 font-display text-sm font-medium uppercase tracking-wide transition hover:bg-ink-950 hover:text-white disabled:opacity-60 dark:border-white dark:hover:bg-white dark:hover:text-ink-950"
                   >
-                    Load more stories
+                    {loadingMoreNews ? 'Loading…' : 'Load more stories'}
                   </button>
                 </div>
               )}

@@ -1,7 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { websiteConfig } from '../config/websiteConfig';
 import { applySettings } from '../config/siteSettings';
-import { fetchNews, searchNews } from '../data/newsData';
+import { fetchArticle, fetchNewsPage } from '../data/newsData';
 import { fetchCeoProfile, fetchTeam } from '../data/siteData';
 
 /**
@@ -11,12 +11,13 @@ import { fetchCeoProfile, fetchTeam } from '../data/siteData';
  *  Holds:
  *   • `config`      — the live, static website configuration (brand, nav, contact)
  *   • `theme`       — dark / light preference, persisted to localStorage
- *   • `newsItems`   — news published from the admin dashboard, fetched once
+ *   • `newsItems`   — the latest page of stories (excerpts); more via `loadMoreNews`
+ *   • `articleCache` — full stories fetched on demand via `loadArticle`
  *   • `teamMembers` — editorial team roster, fetched from the admin dashboard
  *   • `ceoProfile`  — CEO/Founder spotlight, fetched from the admin dashboard
  *   • `searchQuery` / `searchResults` — drives the header search overlay
  *
- *  Search filtering happens entirely in state; no route change or reload.
+ *  Search queries the server (debounced); no route change or reload.
  * =============================================================================
  */
 
@@ -71,18 +72,25 @@ export function SiteProvider({ children }) {
   );
 
   /* --------------------------------- news -------------------------------- */
-  // Loaded once from the real backend; the admin dashboard is the only way
-  // to add, edit or remove items from this list.
+  // The latest page of stories (with short excerpts) is loaded once; older
+  // pages are fetched on demand with `loadMoreNews`. Full article text is
+  // fetched per story with `loadArticle` and kept in `articleCache`
+  // (value `null` means the story doesn't exist).
   const [newsItems, setNewsItems] = useState([]);
   const [newsLoading, setNewsLoading] = useState(true);
   const [newsError, setNewsError] = useState(null);
+  const [hasMoreNews, setHasMoreNews] = useState(false);
+  const [loadingMoreNews, setLoadingMoreNews] = useState(false);
+  const [articleCache, setArticleCache] = useState({});
+  const requestedArticles = useRef(new Set());
 
   const loadNews = useCallback(async () => {
     setNewsLoading(true);
     setNewsError(null);
     try {
-      const items = await fetchNews();
+      const { items, hasMore } = await fetchNewsPage();
       setNewsItems(items);
+      setHasMoreNews(hasMore);
     } catch (err) {
       setNewsError(err.message || 'Failed to load news.');
     } finally {
@@ -93,6 +101,36 @@ export function SiteProvider({ children }) {
   useEffect(() => {
     loadNews();
   }, [loadNews]);
+
+  const loadMoreNews = useCallback(async () => {
+    if (loadingMoreNews || !hasMoreNews) return;
+    setLoadingMoreNews(true);
+    try {
+      const { items, hasMore } = await fetchNewsPage({ offset: newsItems.length });
+      setNewsItems((prev) => {
+        const seen = new Set(prev.map((n) => n.id));
+        return [...prev, ...items.filter((n) => !seen.has(n.id))];
+      });
+      setHasMoreNews(hasMore);
+    } catch {
+      /* keep what we have; the button can be pressed again */
+    } finally {
+      setLoadingMoreNews(false);
+    }
+  }, [hasMoreNews, loadingMoreNews, newsItems.length]);
+
+  const loadArticle = useCallback(async (id) => {
+    const key = String(id);
+    if (requestedArticles.current.has(key)) return;
+    requestedArticles.current.add(key);
+    try {
+      const article = await fetchArticle(key);
+      setArticleCache((prev) => ({ ...prev, [key]: article }));
+    } catch {
+      requestedArticles.current.delete(key);
+      setArticleCache((prev) => ({ ...prev, [key]: null }));
+    }
+  }, []);
 
   /* --------------------------------- team -------------------------------- */
   // Loaded once from the real backend; the admin dashboard is the only way
@@ -140,11 +178,35 @@ export function SiteProvider({ children }) {
   /* --------------------------------- search ----------------------------- */
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setSearchOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
-  const searchResults = useMemo(
-    () => searchNews(newsItems, searchQuery),
-    [newsItems, searchQuery]
-  );
+  // Search runs on the server so it covers the whole archive, not just the
+  // stories already loaded. Debounced so we don't query on every keystroke.
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q) {
+      setSearchResults([]);
+      setSearchLoading(false);
+      return undefined;
+    }
+    const controller = new AbortController();
+    setSearchLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const { items } = await fetchNewsPage({ q, limit: 20, signal: controller.signal });
+        setSearchResults(items);
+      } catch (err) {
+        if (err.name !== 'AbortError') setSearchResults([]);
+      } finally {
+        if (!controller.signal.aborted) setSearchLoading(false);
+      }
+    }, 300);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [searchQuery]);
 
   const openSearch = useCallback(() => setSearchOpen(true), []);
   const closeSearch = useCallback(() => {
@@ -173,6 +235,11 @@ export function SiteProvider({ children }) {
       newsLoading,
       newsError,
       reloadNews: loadNews,
+      hasMoreNews,
+      loadingMoreNews,
+      loadMoreNews,
+      articleCache,
+      loadArticle,
       teamMembers,
       teamLoading,
       reloadTeam: loadTeam,
@@ -182,6 +249,7 @@ export function SiteProvider({ children }) {
       searchQuery,
       setSearchQuery,
       searchResults,
+      searchLoading,
       isSearchOpen,
       openSearch,
       closeSearch,
@@ -195,6 +263,11 @@ export function SiteProvider({ children }) {
       newsLoading,
       newsError,
       loadNews,
+      hasMoreNews,
+      loadingMoreNews,
+      loadMoreNews,
+      articleCache,
+      loadArticle,
       teamMembers,
       teamLoading,
       loadTeam,
@@ -203,6 +276,7 @@ export function SiteProvider({ children }) {
       loadCeoProfile,
       searchQuery,
       searchResults,
+      searchLoading,
       isSearchOpen,
       openSearch,
       closeSearch,

@@ -5,10 +5,10 @@ import { CloseIcon, SearchIcon } from './Icons';
 
 /**
  * SearchOverlay — full-screen search driven entirely by context state.
- * Results filter live as the user types; no navigation or reload occurs.
+ * Results come from the server as the user types; no navigation or reload occurs.
  */
 export default function SearchOverlay() {
-  const { isSearchOpen, closeSearch, searchQuery, setSearchQuery, searchResults } = useSite();
+  const { isSearchOpen, closeSearch, searchQuery, setSearchQuery, searchResults, searchLoading } = useSite();
 
   if (!isSearchOpen) return null;
 
@@ -52,7 +52,7 @@ export default function SearchOverlay() {
             </p>
           ) : searchResults.length === 0 ? (
             <p className="px-5 py-8 text-center text-sm text-ink-500 dark:text-ink-400">
-              No stories match “{searchQuery}”.
+              {searchLoading ? 'Searching…' : `No stories match “${searchQuery}”.`}
             </p>
           ) : (
             <ul className="divide-y divide-ink-100 dark:divide-ink-800">

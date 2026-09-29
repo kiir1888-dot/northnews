@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Breadcrumbs from '../components/Breadcrumbs';
 import ArticleCard from '../components/ArticleCard';
@@ -14,10 +15,16 @@ import { formatDate } from '../utils/format';
  */
 export default function Article() {
   const { slug: id } = useParams();
-  const { newsItems, newsLoading } = useSite();
-  const article = newsItems.find((n) => String(n.id) === id);
+  const { newsItems, articleCache, loadArticle } = useSite();
 
-  if (newsLoading) return null;
+  useEffect(() => {
+    loadArticle(id);
+  }, [id, loadArticle]);
+
+  // `undefined` = still loading, `null` = no such story.
+  const article = articleCache[id];
+
+  if (article === undefined) return null;
 
   if (!article) {
     return (

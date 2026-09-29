@@ -13,21 +13,32 @@
  * =============================================================================
  */
 
-/** Fetch every published news item (already sorted newest-first by the API). */
-export async function fetchNews() {
-  const res = await fetch('/api/news');
+/** How many stories the public site loads per page. */
+export const NEWS_PAGE_SIZE = 30;
+
+/**
+ * Fetch one page of stories (newest first) with short excerpts.
+ * Resolves to `{ items, hasMore }`.
+ */
+export async function fetchNewsPage({ offset = 0, limit = NEWS_PAGE_SIZE, category, q, signal } = {}) {
+  const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  if (category) params.set('category', category);
+  if (q) params.set('q', q);
+  const res = await fetch(`/api/news?${params}`, { signal });
   if (!res.ok) {
     throw new Error('Failed to load news.');
   }
   const data = await res.json();
-  return data.news ?? [];
+  return { items: data.news ?? [], hasMore: Boolean(data.hasMore) };
 }
 
-/** Full-text search across title and description. */
-export function searchNews(items, query) {
-  const q = query.trim().toLowerCase();
-  if (!q) return [];
-  return items.filter((n) =>
-    [n.title, n.description].filter(Boolean).join(' ').toLowerCase().includes(q)
-  );
+/** Fetch one story with its full text. Resolves to null if it doesn't exist. */
+export async function fetchArticle(id) {
+  const res = await fetch(`/api/news/${encodeURIComponent(id)}`);
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error('Failed to load the story.');
+  }
+  const data = await res.json();
+  return data.news ?? null;
 }
