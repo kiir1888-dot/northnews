@@ -28,7 +28,7 @@ const TEMPLATE_PATHS = [
 let templateCache = null;
 
 function siteUrl(req) {
-  return (process.env.SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  return (process.env.SITE_URL || process.env.VITE_SITE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
 }
 
 async function loadTemplate(req) {
