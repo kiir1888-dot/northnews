@@ -4,6 +4,7 @@ import { useSite } from '../context/SiteContext';
 import { categoryLabel, categorySlug } from '../utils/format';
 
 const DEFAULT_TITLE = 'North i | Independent News & Magazine';
+const DEFAULT_IMAGE_PATH = '/og-image.png';
 
 const STATIC_ROUTES = {
   '/': {
@@ -78,6 +79,7 @@ export default function Seo() {
     let title = STATIC_ROUTES[location.pathname]?.title;
     let description = STATIC_ROUTES[location.pathname]?.description;
     let image;
+    let imageAlt = title;
     let type = 'website';
     let noIndex = false;
 
@@ -87,6 +89,7 @@ export default function Seo() {
         title = `${article.title} | North i`;
         description = article.description || config.brand.description;
         image = article.imagePath;
+        imageAlt = article.title;
         type = 'article';
       } else {
         title = 'Story Not Found | North i';
@@ -118,19 +121,34 @@ export default function Seo() {
     setMeta('meta[property="og:title"]', { property: 'og:title', content: title });
     setMeta('meta[property="og:description"]', { property: 'og:description', content: description });
     setMeta('meta[property="og:url"]', { property: 'og:url', content: canonicalUrl });
-    setMeta('meta[name="twitter:card"]', {
-      name: 'twitter:card',
-      content: image ? 'summary_large_image' : 'summary',
-    });
+    setMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: 'summary_large_image' });
     setMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: title });
     setMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: description });
 
-    if (image) {
-      setMeta('meta[property="og:image"]', { property: 'og:image', content: image });
-      setMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: image });
+    // Social platforms only accept absolute image URLs.
+    let imageUrl = null;
+    try {
+      imageUrl = image ? new URL(image, origin).href : null;
+    } catch {
+      imageUrl = null;
+    }
+    const isDefaultImage = !imageUrl;
+    imageUrl = imageUrl || `${origin}${DEFAULT_IMAGE_PATH}`;
+    if (isDefaultImage) imageAlt = title || DEFAULT_TITLE;
+
+    setMeta('meta[property="og:image"]', { property: 'og:image', content: imageUrl });
+    setMeta('meta[property="og:image:secure_url"]', { property: 'og:image:secure_url', content: imageUrl });
+    setMeta('meta[property="og:image:alt"]', { property: 'og:image:alt', content: imageAlt });
+    setMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: imageUrl });
+    setMeta('meta[name="twitter:image:alt"]', { name: 'twitter:image:alt', content: imageAlt });
+    if (isDefaultImage) {
+      setMeta('meta[property="og:image:type"]', { property: 'og:image:type', content: 'image/png' });
+      setMeta('meta[property="og:image:width"]', { property: 'og:image:width', content: '1200' });
+      setMeta('meta[property="og:image:height"]', { property: 'og:image:height', content: '630' });
     } else {
-      removeMeta('meta[property="og:image"]');
-      removeMeta('meta[name="twitter:image"]');
+      removeMeta('meta[property="og:image:type"]');
+      removeMeta('meta[property="og:image:width"]');
+      removeMeta('meta[property="og:image:height"]');
     }
   }, [articleCache, config.brand.description, config.brand.name, location.pathname, newsItems]);
 

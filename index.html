@@ -3,25 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Social link previews. The SITE_ORIGIN placeholders are replaced with the
+         site's absolute address at build time (see vite.config.js), and article pages have this
+         whole block swapped for story-specific tags by server/routes/share.js. -->
+    <!-- social-meta:start -->
+    <title>North i | Independent News &amp; Magazine</title>
     <meta
       name="description"
-      content="North i: independent journalism, sharp analysis and trusted reporting on politics, technology, business, sport and culture."
+      content="Independent journalism, sharp analysis and trusted reporting on politics, technology, business, sport, education and culture."
     />
     <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="%SITE_ORIGIN%/" />
     <meta property="og:site_name" content="North i" />
+    <meta property="og:locale" content="en_GB" />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="%SITE_ORIGIN%/" />
     <meta property="og:title" content="North i | Independent News &amp; Magazine" />
     <meta
       property="og:description"
       content="Independent journalism, sharp analysis and trusted reporting on politics, technology, business, sport, education and culture."
     />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="%SITE_ORIGIN%/og-image.png" />
+    <meta property="og:image:secure_url" content="%SITE_ORIGIN%/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="North i | Independent News &amp; Magazine" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="North i | Independent News &amp; Magazine" />
     <meta
       name="twitter:description"
       content="Independent journalism, sharp analysis and trusted reporting on politics, technology, business, sport, education and culture."
     />
-    <title>North i | Independent News &amp; Magazine</title>
+    <meta name="twitter:image" content="%SITE_ORIGIN%/og-image.png" />
+    <meta name="twitter:image:alt" content="North i | Independent News &amp; Magazine" />
+    <!-- social-meta:end -->
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

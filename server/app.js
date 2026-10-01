@@ -16,6 +16,7 @@ import commentsRoutes from './routes/comments.js';
 import submissionsRoutes from './routes/submissions.js';
 import settingsRoutes from './routes/settings.js';
 import seoRoutes from './routes/seo.js';
+import shareRoutes from './routes/share.js';
 import { isMailConfigured } from './mailer.js';
 
 /**
@@ -35,6 +36,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/', seoRoutes);
+app.use('/', shareRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/news', newsRoutes);
